@@ -5,7 +5,7 @@ const sequelize = new Sequelize(
   "root",
   "Filipinas1.",
   {
-    host: "localhost",
+    host: process.env.DB_HOST || "localhost",
     dialect: "mysql"
   }
 );

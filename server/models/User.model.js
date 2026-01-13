@@ -10,9 +10,20 @@ const User = sequelize.define(
       primaryKey: true
     },
 
-    fullName: {
+    firstName: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+
+    middleName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: ""
     },
 
     email: {
@@ -29,13 +40,18 @@ const User = sequelize.define(
       unique: true
     },
 
+    nonce: {                    // ✅ REQUIRED
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
     password: {
       type: DataTypes.STRING,
       allowNull: true
     },
 
     role: {
-      type: DataTypes.ENUM("FARMER", "BUYER", "ADMIN", "LOGISTICS"),
+      type: DataTypes.ENUM("SELLER", "BUYER", "ADMIN", "LOGISTICS"),
       allowNull: false,
       defaultValue: "BUYER"
     },
@@ -49,12 +65,6 @@ const User = sequelize.define(
       type: DataTypes.ENUM("ACTIVE", "SUSPENDED"),
       defaultValue: "ACTIVE"
     },
-
-    // 🔥 Add nonce for wallet signature login
-    nonce: {
-      type: DataTypes.STRING,
-      allowNull: true
-    }
   },
   {
     tableName: "users",
