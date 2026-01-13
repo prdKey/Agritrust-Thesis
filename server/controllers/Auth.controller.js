@@ -33,7 +33,7 @@ export const verifySignature = async (req, res) => {
   const user = await User.findOne({ where: { walletAddress } });
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  const message = `Login nonce: ${user.nonce}`;
+  const message = `AgriTrust Login: ${user.nonce}`;
   const signerAddress = ethers.verifyMessage(message, signature);
 
   if (signerAddress.toLowerCase() === walletAddress.toLowerCase()) {
@@ -42,13 +42,13 @@ export const verifySignature = async (req, res) => {
     await user.save();
 
     const token = jwt.sign(
-      { walletAddress: user.walletAddress, id: user.id},
+      { walletAddress: user.walletAddress, id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
     // Here you can generate a JWT token or session
-    return res.json({ message: "Login successful", token });
+    return res.json({ message: "Login successful", token});
   }
 
   res.status(401).json({ error: "Invalid signature" });

@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Product = sequelize.define(
-  "Product",
+const Order = sequelize.define(
+  "Order",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,27 +10,24 @@ const Product = sequelize.define(
       primaryKey: true
     },
 
-    name: {
-      type: DataTypes.STRING,
+    buyerId: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
 
-    sellerName: {
-      type: DataTypes.STRING,
+    sellerId: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
 
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true
+    productId: {
+      type: DataTypes.INTEGER,  // ✅ Must be INTEGER to FK to products.id
+      allowNull: false
     },
 
     quantity: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        min: 0
-      }
+      allowNull: false
     },
 
     unit: {
@@ -49,19 +46,14 @@ const Product = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("AVAILABLE", "OUT_OF_STOCK"),
-      defaultValue: "AVAILABLE"
+      type: DataTypes.ENUM("None", "Paid", "Shipped", "Completed", "Disputed", "Refunded"),
+      defaultValue: "None"
     },
-
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    }
   },
   {
-    tableName: "products",
+    tableName: "orders",
     timestamps: true
   }
 );
 
-export default Product;
+export default Order;
