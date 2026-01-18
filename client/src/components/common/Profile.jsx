@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Profile() {
-  const [username, setUsername] = useState("carlosgt535");
-  const [name, setName] = useState("Carlos John Prado");
-  const [email, setEmail] = useState("pr************@gmail.com");
-  const [phone, setPhone] = useState("");
+  const {user} = useAuth();
+  const [username, setUsername] = useState(user.walletAddress);
+  const [name, setName] = useState(user.firstName + " " + user.lastName);
+  const [email, setEmail] = useState(user.email);
+  const [phone, setPhone] = useState(user.mobileNumber);
   const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("1990-01-01"); // example
+  const [dob, setDob] = useState("1990-10-01"); // example
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -16,14 +18,15 @@ export default function Profile() {
     <>
       <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-gray-700 font-medium mb-1">Username</label>
+                <label className="block text-gray-700 font-medium mb-1">Wallet Address</label>
                 <input
                   type="text"
+                  disabled={true}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  className="w-full border text-gray-400 border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
                 />
-                <p className="text-gray-400 text-sm mt-1">Username can only be changed once.</p>
+                <p className="text-gray-400 text-sm mt-1">Wallet address can't be changed.</p>
               </div>
 
               <div>

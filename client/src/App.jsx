@@ -14,8 +14,9 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/market" element={<ProtectedRoute><Market /></ProtectedRoute>} />
+          <Route path="/market" element={<Market />} />
           <Route path="/user" element={<ProtectedRoute><Account/></ProtectedRoute>}>
+            <Route index element={<Profile />} />
             <Route path="profile" element={<Profile/>}/>
             <Route path="addresses" element={<div>profile</div>}/>
             <Route path="profile" element={<div>profile</div>}/>
