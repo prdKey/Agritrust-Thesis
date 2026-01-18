@@ -1,35 +1,36 @@
-import { createContext, useEffect, useContext, useState } from "react";
-import { getToken, saveToken, removeToken } from "../services/authService";
-import {listenWalletDisconnect} from "../services/walletListener.js";
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import { getToken, removeToken } from "../../../shared/auth/tokenService.js";
+
+const API_URL = "http://localhost:3001/api";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [jwt, setJwt] = useState(getToken());
-  const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
-
-  const loginWithJwt = (token) => {
-    saveToken(token);
-    setJwt(token);
-    setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    removeToken();
-    setJwt(null);
-    setIsAuthenticated(false);
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    listenWalletDisconnect(logout);
+    const token = getToken();
+    if (token) {
+      axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => setUser(res.data.user))
+        .catch(() => setUser(null))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  
-  return (
-    <AuthContext.Provider value={{ jwt, isAuthenticated, loginWithJwt, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const login = (userData) => setUser(userData);
+  const logout = () => {
+    setUser(null);
+    removeToken();
+  };
+
+  return <AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

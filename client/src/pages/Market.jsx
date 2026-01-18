@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FilterCard from "../components/common/FilterCard.jsx";
 import ProductCard from "../components/common/ProductCard.jsx";
+import { getAllProducts } from "../Services/productService.js";
 
 const Marketplace = () => {
   const [search, setSearch] = useState("");
@@ -8,21 +9,30 @@ const Marketplace = () => {
   const [priceRange, setPriceRange] = useState([0, 100]);
   const [rating, setRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // new loading state
 
-  const productsData = [
-    { id: 1, name: "Apple", farmer: "Juan", category: "Fruits", price: 50, stock: 20, rating: 4, image: "https://via.placeholder.com/400" },
-    { id: 2, name: "Carrot", farmer: "Maria", category: "Vegetables", price: 30, stock: 0, rating: 5, image: "https://via.placeholder.com/400" },
-    { id: 3, name: "Tomato", farmer: "Pedro", category: "Vegetables", price: 40, stock: 10, rating: 3, image: "https://via.placeholder.com/400" },
-    { id: 4, name: "Appdwadle", farmer: "Juan", category: "Fruits", price: 50, stock: 20, rating: 4, image: "https://via.placeholder.com/400" },
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getAllProducts();
+        setProducts(data.products); // safe optional chaining
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredProducts = productsData.filter(
+    fetchProducts();
+  }, []);
+
+
+  const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) &&
-      (category === "" || p.category === category) &&
-      p.price >= priceRange[0] &&
-      p.price <= priceRange[1] &&
-      p.rating >= rating &&
+      p.pricePerUnit >= priceRange[0] &&
+      p.pricePerUnit <= priceRange[1] &&
       (!inStockOnly || p.stock > 0)
   );
 
@@ -45,11 +55,13 @@ const Marketplace = () => {
           />
         </aside>
 
-
-
         {/* Products */}
         <main className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.length ? (
+          {loading ? (
+            <p className="text-gray-500 col-span-full text-center mt-10">
+              Loading products...
+            </p>
+          ) : filteredProducts.length ? (
             filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))

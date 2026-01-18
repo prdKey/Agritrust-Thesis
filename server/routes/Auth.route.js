@@ -1,8 +1,10 @@
 import express from "express"
-import {requestNonce, verifySignature} from "../controllers/Auth.controller.js";
+import {loginWallet, getMe, registerWallet, verifySignature} from "../controllers/Auth.controller.js";
 const router = express.Router();
 
-router.post("/nonce", requestNonce);
+router.post("/wallet-login", loginWallet);
+router.post("/wallet-register", registerWallet);
+router.get("/me", getMe);
 router.post("/verify", verifySignature);
 
 

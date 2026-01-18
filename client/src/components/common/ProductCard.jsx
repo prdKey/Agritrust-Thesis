@@ -11,14 +11,14 @@ const ProductCard = ({ product }) => {
       />
 
       {/* Product Details */}
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-4 flex flex-col grow">
         <h3 className="font-semibold text-lg">{product.name}</h3>
-        <p className="text-gray-500 text-sm">Farmer: {product.farmer}</p>
-        <p className="text-green-600 font-bold mt-1">{product.price} AGT</p>
+        <p className="text-gray-500 text-sm">Seller: {product.sellerName}</p>
+        <p className="text-green-600 font-bold mt-1">{product.pricePerUnit} AGT</p>
         <p className="text-gray-600 text-sm mt-1">Stock: {product.stock}</p>
 
         {/* Rating */}
-        <div className="flex items-center mt-2">
+        <div className="flex items-center mt-1">
           {Array.from({ length: 5 }, (_, i) => (
             <svg
               key={i}
