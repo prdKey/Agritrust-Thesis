@@ -13,9 +13,9 @@ const app = express();
 app.use(express.json());
 app.use(cors())
 
-app.use("/products", productRoute)
-app.use("/auth", authRoute)
-app.use("/users", userRoute)
+app.use("/api/products", productRoute)
+app.use("/api/auth", authRoute)
+app.use("/api/users", userRoute)
 
 // Sync database & start server
 sequelize.sync({ alter: true }).then(() => {

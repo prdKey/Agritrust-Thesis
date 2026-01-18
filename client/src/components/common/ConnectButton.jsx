@@ -1,43 +1,44 @@
 import { useState } from "react";
-import { useWallet } from "../../context/WalletContext.jsx";
-import {useAuth} from "../../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { loginWithWallet, verifySignature, registerWithWallet } from "../../../../shared/auth/authService.js";
+import { redirectByRole } from "../../../../shared/auth/redirectByRole.js";
+import { ethers } from "ethers";
 
-export default function WalletLogin() {
-  const navigate = useNavigate();
-  const { isAuthenticated, logout} = useAuth();
+export default function ConnectWalletButton() {
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-  const { connectToWallet } = useWallet();
 
-  const handleClick = async () => {
-    if (isAuthenticated) {
-      logout();
-    } else {
-      try {
-        setLoading(true);
-        await connectToWallet();
-        navigate("/market");
-      } catch (error) {
-        console.error("Error connecting to wallet:", error);
-      } finally {
-        setLoading(false); 
-      }
-    };
+  const connectWalletAndLogin = async () => {
+    if (!window.ethereum) return alert("MetaMask not detected!");
+    setLoading(true);
+
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      const nonce = await loginWithWallet(address);
+      const signature = await signer.signMessage(`AgriTrust Login: ${nonce}`);
+      const data = await verifySignature(address, signature);
+      console.log("Login successful, user data:", data.user);
+      login(data.user);
+      redirectByRole(data.user.role);
+    } catch (err) {
+      console.error(err);
+      alert("Login failed: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <button
-      onClick={handleClick}
+      onClick={connectWalletAndLogin}
       disabled={loading}
-      className={`px-4 py-2 rounded ${
-        isAuthenticated ? "bg-red-600" : "bg-green-600"
-      } text-white`}
+      className="bg-green-600 text-white px-4 py-2 rounded"
     >
-      {loading
-        ? "Connecting..."
-        : isAuthenticated
-        ? "Disconnect Wallet"
-        : "Connect Wallet"}
+      {loading ? "Connecting..." : "Connect Wallet"}
     </button>
   );
 }

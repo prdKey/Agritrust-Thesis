@@ -1,4 +1,5 @@
 import ConnectButton from "../common/ConnectButton.jsx";
+import Logout from "../common/Logout.jsx";
 
 export default function Header() {
   return (

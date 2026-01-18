@@ -1,37 +1,118 @@
-const ProfileTab = () => {
+import { useState } from 'react';
+
+export default function Profile() {
+  const [username, setUsername] = useState("carlosgt535");
+  const [name, setName] = useState("Carlos John Prado");
+  const [email, setEmail] = useState("pr************@gmail.com");
+  const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("1990-01-01"); // example
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    alert("Profile saved!");
+  };
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md">
-      <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
+    <>
+      <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Username</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+                <p className="text-gray-400 text-sm mt-1">Username can only be changed once.</p>
+              </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="input"
-        />
-        <input
-          type="email"
-          placeholder="Email Address"
-          className="input"
-        />
-        <input
-          type="text"
-          placeholder="Wallet Address"
-          disabled
-          className="input bg-gray-100 cursor-not-allowed"
-        />
-        <input
-          type="text"
-          placeholder="Phone Number"
-          className="input"
-        />
-      </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
 
-      <button className="mt-6 bg-green-600 text-white px-6 py-2 rounded">
-        Save Changes
-      </button>
-    </div>
-  );
-};
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Email</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  />
+                  <button type="button" className="text-green-600 font-medium hover:underline">
+                    Change
+                  </button>
+                </div>
+              </div>
 
-export default ProfileTab;
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
+                <button
+                  type="button"
+                  onClick={() => setPhone("+63")}
+                  className="text-green-600 font-medium hover:underline"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Gender</label>
+                <div className="flex items-center gap-4">
+                  {["Male", "Female", "Other"].map((g) => (
+                    <label key={g} className="flex items-center gap-1">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={g}
+                        checked={gender === g}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="accent-green-500"
+                      />
+                      {g}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Date of Birth</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  />
+                  <button type="button" className="text-green-600 font-medium hover:underline">
+                    Change
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Profile Image</label>
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png"
+                  className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+                <p className="text-gray-400 text-sm mt-1">File size: maximum 1 MB. File extension: .JPEG, .PNG</p>
+              </div>
+
+              <button
+                type="submit"
+                className="bg-green-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                Save
+              </button>
+            </form>
+    </>
+  )
+}

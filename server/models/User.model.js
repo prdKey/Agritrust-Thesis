@@ -12,12 +12,12 @@ const User = sequelize.define(
 
     firstName: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
 
     lastName: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
 
     middleName: {
@@ -26,9 +26,14 @@ const User = sequelize.define(
       defaultValue: ""
     },
 
+    mobileNumber: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
     email: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
       validate: {
         isEmail: true
       }
@@ -51,9 +56,9 @@ const User = sequelize.define(
     },
 
     role: {
-      type: DataTypes.ENUM("SELLER", "BUYER", "ADMIN", "LOGISTICS"),
+      type: DataTypes.ENUM("USER","SELLER", "ADMIN", "LOGISTICS"),
       allowNull: false,
-      defaultValue: "BUYER"
+      defaultValue: "USER"
     },
 
     isVerified: {
