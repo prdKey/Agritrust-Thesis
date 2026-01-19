@@ -26,7 +26,7 @@ const User = sequelize.define(
       defaultValue: ""
     },
 
-    mobileNumber: {
+    phone: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -39,13 +39,22 @@ const User = sequelize.define(
       }
     },
 
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    dob: {                           // ✅ Added Date of Birth
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+
     walletAddress: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
     },
 
-    nonce: {                    // ✅ REQUIRED
+    nonce: {                        
       type: DataTypes.STRING,
       allowNull: false
     },

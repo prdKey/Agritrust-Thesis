@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { getToken, removeToken } from "../../../shared/auth/tokenService.js";
+import { saveToken ,getToken, removeToken } from "../../../shared/auth/tokenService.js";
 
 const API_URL = "http://localhost:3001/api";
 
@@ -24,7 +24,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (userData) => setUser(userData);
+ 
+  const login = (data) => {
+    saveToken(data.token)
+    setUser(data.user);
+  }
   const logout = () => {
     setUser(null);
     removeToken();

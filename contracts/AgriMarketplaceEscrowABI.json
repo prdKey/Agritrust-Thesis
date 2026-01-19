@@ -26,24 +26,11 @@
 			},
 			{
 				"internalType": "address",
-				"name": "senderAddress",
+				"name": "buyerAddress",
 				"type": "address"
 			}
 		],
-		"name": "addToCart",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "senderAddress",
-				"type": "address"
-			}
-		],
-		"name": "checkoutCart",
+		"name": "buyProduct",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -475,24 +462,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "productId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "senderAddress",
-				"type": "address"
-			}
-		],
-		"name": "removeFromCart",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "provider",
 				"type": "address"
@@ -647,6 +616,35 @@
 			{
 				"internalType": "uint256",
 				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			}
+		],
+		"name": "getBuyerStats",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalOrders",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "activeOrders",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "agtSpent",
 				"type": "uint256"
 			}
 		],
@@ -855,6 +853,67 @@
 					}
 				],
 				"internalType": "struct AgriMarketplaceEscrow.Product[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "count",
+				"type": "uint256"
+			}
+		],
+		"name": "getRecentBuyerOrders",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "productId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyer",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "seller",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum AgriMarketplaceEscrow.OrderStatus",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"internalType": "struct AgriMarketplaceEscrow.Order[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -1134,66 +1193,6 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "userCarts",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "productId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "quantity",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "senderAddress",
-				"type": "address"
-			}
-		],
-		"name": "viewCart",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "uint256",
-						"name": "productId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "quantity",
-						"type": "uint256"
-					}
-				],
-				"internalType": "struct AgriMarketplaceEscrow.CartItem[]",
-				"name": "",
-				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",

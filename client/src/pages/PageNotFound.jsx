@@ -10,10 +10,10 @@ const NotFound = () => {
       </p>
 
       <Link
-        to="/"
+        to="/market"
         className="mt-6 bg-green-600 text-white px-6 py-2 rounded"
       >
-        Go Home
+        Go Market
       </Link>
     </div>
   );
