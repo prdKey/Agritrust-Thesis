@@ -9,7 +9,7 @@ export const getAllProducts = async (req, res) => {
     const products = [];
     for (let i = 1; i <= Number(count); i++) {
       const product = await contract.products(i);
-
+      console.log(product)
       // Skip deleted / empty products
       if (product.seller === "0x0000000000000000000000000000000000000000") {
         continue;
@@ -49,25 +49,25 @@ export const getProductOwner = async (req, res) => {
 
 export const getProductsByUser = async (req, res) => {
   try {
-  const user = await User.findByPk(req.params.userId);
-  if (!user) return res.status(404).json({ message: "User not found" });
-  
-  const productsRaw = await contract.getProductsBySeller(user.walletAddress)
+    const user = await User.findByPk(req.params.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    const productsRaw = await contract.getProductsBySeller(user.walletAddress)
 
-  const products = productsRaw.map((p) => ({
-      id: Number(p[0]),
-      sellerName: user.firstName +" "+ user.lastName,            // BigInt -> string
-      sellerAddress: p[1],
-      name: p[2],
-      description: p[3],
-      category: p[4],
-      pricePerUnit: Number(p[5]),  // BigInt -> string
-      quantity: Number(p[6]),      // BigInt -> string
-      available: p[7]
-    }));
+    const products = productsRaw.map((p) => ({
+        id: Number(p[0]),
+        sellerName: user.firstName +" "+ user.lastName,            // BigInt -> string
+        sellerAddress: p[1],
+        name: p[2],
+        description: p[3],
+        category: p[4],
+        pricePerUnit: Number(p[5]),  // BigInt -> string
+        quantity: Number(p[6]),      // BigInt -> string
+        available: p[7]
+      }));
 
-  console.log(products)
-  res.json({products});
+    console.log(products)
+    res.json({products});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -1,83 +1,44 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import {useState, useEffect} from "react";
+import { useNavigate, useLocation} from "react-router-dom";
+import { FaHome, FaUser, FaBox, FaShoppingCart, FaBell, FaCog } from "react-icons/fa";
 
-const Sidebar = () => {
-  const [openMenu, setOpenMenu] = useState(null); // which main menu is open
 
-  const menus = [
-    {
-      title: "My Account",
-      links: [
-        { name: "Profile", path: "profile" },
-        { name: "Banks & Cards", path: "banks-cards" },
-        { name: "Addresses", path: "addresses" },
-      ],
-    },
-    {
-      title: "My Purchase",
-      links: [
-        { name: "All", path: "/purchase/all" },
-        { name: "To Pay", path: "/purchase/to-pay" },
-        { name: "To Ship", path: "/purchase/to-ship" },
-        { name: "To Receive", path: "/purchase/to-receive" },
-        { name: "Completed", path: "/purchase/completed" },
-        { name: "Cancelled", path: "/purchase/cancelled" },
-        { name: "Return / Refund", path: "/purchase/return-refund" },
-      ],
-    },
-    {
-      title: "Notifications",
-      links: [{ name: "Notification Settings", path: "/notifications" }],
-    },
-    {
-      title: "Settings",
-      links: [
-        { name: "Change Password", path: "/change-password" },
-        { name: "Privacy Settings", path: "/privacy-settings" },
-      ],
-    },
+export default function Sidebar() {
+  const [active, setActive] = useState("Dashboard")
+  const navigate = useNavigate();
+  const location = useLocation();
+  const menuItems = [
+    { name: "Dashboard", icon: <FaHome /> , path: "dashboard"},
+    { name: "Profile", icon: <FaUser /> , path: "profile"},
+    { name: "My Purchase", icon: <FaShoppingCart />, path: "purchase" },
+    { name: "Notifications", icon: <FaBell /> , path: "notifications"},
+    { name: "Settings", icon: <FaCog /> , path: "settings"},
   ];
 
-  const toggleMenu = (title) => {
-    if (openMenu === title) setOpenMenu(null);
-    else setOpenMenu(title);
-  };
+  useEffect(()=>{
+    if (location.pathname === "/user") {
+      setActive("Dashboard");
+    }
+  },[location.pathname])
 
   return (
-    <div className="w-full md:w-1/4 bg-green-50 p-4 rounded-lg space-y-2">
-      {menus.map((menu) => (
-        <div key={menu.title}>
-          {/* Main header */}
-          <div
-            className="flex justify-between items-center font-semibold text-green-700 cursor-pointer p-2 hover:bg-green-100 rounded"
-            onClick={() => toggleMenu(menu.title)}
-          >
-            {menu.title}
-          </div>
-
-          {/* Sub-items */}
-          <div
-            className={`overflow-hidden transition-all duration-300 ${
-              openMenu === menu.title ? "max-h-80 mt-2" : "max-h-0"
-            }`}
-          >
-            <ul className="space-y-1 text-gray-700 pl-4">
-              {menu.links.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.path}
-                    className="block cursor-pointer hover:text-green-600"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="w-full md:w-64 bg-white shadow-md p-4 rounded-lg space-y-2">
+      {menuItems.map((item) => (
+        <div
+          onClick={() => {
+            setActive(item.name)
+            navigate(item.path)
+          }}
+          key={item.name}
+          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+            active === item.name ? "bg-green-500 text-white" : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+     
+          <span>{item.icon}</span>
+          <span className="font-medium">{item.name}</span>
         </div>
       ))}
     </div>
   );
-};
-
-export default Sidebar;
+}

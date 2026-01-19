@@ -7,7 +7,7 @@ function Account() {
 
   return (
       <div className="w-full m-6 mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-semibold mb-6 text-green-600">My Profile</h1>
+        <h1 className="text-2xl font-semibold mb-6 text-green-600">My Account</h1>
         <p className="text-gray-500 mb-4">Manage and protect your account</p>
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}

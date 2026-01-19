@@ -8,7 +8,7 @@ export default function Logout() {
       onClick={logout}
       className="bg-red-600 text-white px-4 py-2 rounded"
     >
-        Logout
+        Disconnect Wallet
     </button>
   )
 }

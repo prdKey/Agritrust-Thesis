@@ -6,9 +6,9 @@ export default function Profile() {
   const [username, setUsername] = useState(user.walletAddress);
   const [name, setName] = useState(user.firstName + " " + user.lastName);
   const [email, setEmail] = useState(user.email);
-  const [phone, setPhone] = useState(user.mobileNumber);
-  const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("1990-10-01"); // example
+  const [phone, setPhone] = useState(user.phone);
+  const [gender, setGender] = useState(user.gender);
+  const [dob, setDob] = useState(user.dob); // example
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -48,21 +48,21 @@ export default function Profile() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
                   />
-                  <button type="button" className="text-green-600 font-medium hover:underline">
-                    Change
-                  </button>
                 </div>
               </div>
 
               <div>
                 <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
-                <button
-                  type="button"
-                  onClick={() => setPhone("+63")}
-                  className="text-green-600 font-medium hover:underline"
-                >
-                  Add
-                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="tel"
+                    value={phone}
+                    pattern="^09\d{9}$"
+                    placeholder="09XXXXXXXXX"
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                  />
+                </div>
               </div>
 
               <div>
