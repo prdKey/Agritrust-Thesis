@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { loginWithWallet, verifySignature} from "../../../../shared/auth/authService.js";
-import { redirectByRole } from "../../../../shared/auth/redirectByRole.js";
+import { loginWithWallet, verifySignature} from "../../auth/authService.js";
+import { redirectByRole } from "../../auth/redirectByRole.js";
 import { ethers } from "ethers";
 
 export default function ConnectWalletButton() {
@@ -17,7 +17,6 @@ export default function ConnectWalletButton() {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
-
       const nonce = await loginWithWallet(address);
       const signature = await signer.signMessage(`AgriTrust Login: ${nonce}`);
       const data = await verifySignature(address, signature);

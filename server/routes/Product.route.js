@@ -12,14 +12,14 @@ import authMiddleware from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 //private routes
-router.post("/my", authMiddleware, createProduct);
-router.put("/my/:id", authMiddleware, updateProduct);
-router.delete("/my/:id", authMiddleware, deleteProduct);
+router.post("/", authMiddleware, createProduct);
+router.put("/", authMiddleware, updateProduct);
+router.delete("/:id", authMiddleware, deleteProduct);
 
 //public routes
 router.get("/", getAllProducts);
 router.get("/:id/owner", getProductOwner);
-router.get("/user/:userId", getProductsByUser);
+router.get("/user/", authMiddleware ,getProductsByUser);
 router.get("/:id", getProductById);
 
 export default router;

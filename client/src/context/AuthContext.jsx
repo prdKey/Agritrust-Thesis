@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { saveToken ,getToken, removeToken } from "../../../shared/auth/tokenService.js";
+import { saveToken ,getToken, removeToken } from "../auth/tokenService.js";
 
 const API_URL = "http://localhost:3001/api";
 

@@ -16,7 +16,7 @@ export default function Profile() {
   };
   return (
     <>
-      <form onSubmit={handleSave} className="space-y-4">
+      <form onSubmit={handleSave} className="h-full rounded-lg bg-gray-100 p-6 space-y-6">
               <div>
                 <label className="block text-gray-700 font-medium mb-1">Wallet Address</label>
                 <input
