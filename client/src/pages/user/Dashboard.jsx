@@ -1,8 +1,8 @@
-import DashboardCard from "./DashboardCard.jsx";
-import RecentCard from "./RecentCard.jsx";
+import DashboardCard from "../../components/common/DashboardCard.jsx";
+import RecentCard from "../../components/common/RecentCard.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useEffect, useState} from "react";
-import {getRecentBuyerOrders} from "../../Services/orderService.js"
+import {getRecentBuyerOrders} from "../../services/orderService.js"
 
 const Dashboard = () => {
   const {user} = useAuth()
@@ -28,7 +28,7 @@ const Dashboard = () => {
 
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="h-full rounded-lg bg-gray-100 p-6 space-y-6">
       {/* Top Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <DashboardCard

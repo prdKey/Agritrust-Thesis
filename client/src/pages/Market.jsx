@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import FilterCard from "../components/common/FilterCard.jsx";
 import ProductCard from "../components/common/ProductCard.jsx";
-import { getAllProducts } from "../Services/productService.js";
+import { getAllProducts } from "../services/productService.js";
 
 const Marketplace = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [priceRange, setPriceRange] = useState(["", ""]);
   const [rating, setRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [products, setProducts] = useState([]);
@@ -16,7 +16,7 @@ const Marketplace = () => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProducts();
-        setProducts(data.products); // safe optional chaining
+        setProducts(data.products);
       } catch (err) {
         console.error("Failed to fetch products:", err);
       } finally {
@@ -27,12 +27,12 @@ const Marketplace = () => {
     fetchProducts();
   }, []);
 
-
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) &&
-      p.pricePerUnit >= priceRange[0] &&
-      p.pricePerUnit <= priceRange[1] &&
+    (priceRange[0] === ""? true : p.pricePerUnit >= priceRange[0] ) &&
+    (priceRange[1] === ""? true : p.pricePerUnit <= priceRange[1]) &&
+    (category === "" ? true : p.category === category) &&
       (!inStockOnly || p.stock > 0)
   );
 
@@ -56,7 +56,7 @@ const Marketplace = () => {
         </aside>
 
         {/* Products */}
-        <main className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {loading ? (
             <p className="text-gray-500 col-span-full text-center mt-10">
               Loading products...

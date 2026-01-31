@@ -49,14 +49,14 @@ const FilterCard = ({
           <input
             type="number"
             value={priceRange[0]}
-            onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+            onChange={(e) => setPriceRange([e.target.value, priceRange[1]])}
             placeholder="Min"
             className="w-1/2 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-600"
           />
           <input
             type="number"
             value={priceRange[1]}
-            onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+            onChange={(e) => setPriceRange([priceRange[0], e.target.value])}
             placeholder="Max"
             className="w-1/2 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-600"
           />

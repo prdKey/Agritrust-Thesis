@@ -49,7 +49,7 @@ export const getProductOwner = async (req, res) => {
 
 export const getProductsByUser = async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.userId);
+    const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     
     const productsRaw = await contract.getProductsBySeller(user.walletAddress)
@@ -58,6 +58,7 @@ export const getProductsByUser = async (req, res) => {
         id: Number(p[0]),
         sellerName: user.firstName +" "+ user.lastName,            // BigInt -> string
         sellerAddress: p[1],
+        imageCID: p.imageCID,
         name: p[2],
         description: p[3],
         category: p[4],
@@ -110,14 +111,21 @@ export const getProducts = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    const userId = 1;
-    const { name, description, quantity, unit, price, imageCID } = req.body;
+    const userId = req.user.id;
+    const { name, quantity, category ,pricePerUnit, imageCID } = req.body;
+    console.log("")
 
     const seller = await User.findByPk(userId);
     if (!seller) return res.status(404).json({ message: "Seller not found" });
-
-    const product = await Product.create({ name, description, quantity, unit, price, imageCID, userId});
-    res.status(201).json(product);
+    const tx = await contract.listProduct(
+      name,
+      imageCID,
+      category,
+      pricePerUnit,
+      quantity,
+      seller.walletAddress
+    )
+    res.status(201).json(tx);
   }
   catch (err) {
     res.status(500).json({ message: err.message });
@@ -127,30 +135,37 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const sellerId = req.user.id;
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    if (product.sellerId !== sellerId) return res.status(403).json({ message: "Forbidden. You can only update your own products." });
-    const { name, sellerName, description, quantity, unit, price, imageCID } = req.body;
+    const { id, name, quantity, category, pricePerUnit, imageCID } = req.body;
+    console.log(imageCID)
     const seller = await User.findByPk(sellerId);
     if (!seller) return res.status(404).json({ message: "Seller not found" });
-    await product.update({ name, sellerName, description, quantity, unit, price, imageCID });
-    res.json(product);
+    const tx = await contract.updateProduct(
+      id,
+      name,
+      imageCID,
+      category,
+      pricePerUnit,
+      quantity,
+      seller.walletAddress
+    )
+    res.status(201).json(tx);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 }
 export const deleteProduct = async (req, res) => {
   try {
+    console.log("dwada")
     const sellerId = req.user.id;
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    if (product.sellerId !== sellerId) return res.status(403).json({ message: "Forbidden. You can only delete your own products." });
-    
+    const id = req.params.id
+    console.log(id)
     const seller = await User.findByPk(sellerId);
     if (!seller) return res.status(404).json({ message: "Seller not found" });
-
-    await product.destroy();
-    res.json({ message: "Product deleted successfully" });
+    const tx = await contract.deleteProduct(
+      id,
+      seller.walletAddress
+    )
+    res.status(201).json(tx);
   }
   catch (err) {
     res.status(500).json({ message: err.message });

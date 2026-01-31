@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {registerWithWallet } from "../../../shared/auth/authService.js";
+import {registerWithWallet } from "../auth/authService.js";
 import { ethers } from "ethers";
 import { Link } from "react-router-dom";
 

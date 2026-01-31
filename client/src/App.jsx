@@ -7,16 +7,26 @@ import ProtectedRoute from "./components/common/ProtectedRoutes.jsx"
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Account from "./pages/Account.jsx";
-import Profile from "./components/common/Profile.jsx";
+import Profile from "./pages/user/Profile.jsx";
 import PageNotFound from "./pages/PageNotFound.jsx"
-import Dashboard from "./components/common/Dashboard.jsx";
-import Settings from "./components/common/Settings.jsx";
+import Dashboard from "./pages/user/Dashboard.jsx";
+import Settings from "./pages/user/Settings.jsx";
+import SellerPanel from "./pages/seller/SellerPanel.jsx";
+import SellerDashboard from "./pages/seller/SellerDashboard.jsx"
+import SellerProducts from "./pages/seller/SellerProduct.jsx";
+import SellerOrders from "./pages/seller/SellerOrders.jsx"
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route element={<Layout />}>
+          <Route path="/seller" element={<ProtectedRoute><SellerPanel/></ProtectedRoute>}>
+            <Route index element={<SellerDashboard/>}/>
+            <Route path="dashboard" element={<SellerDashboard />}/>
+            <Route path="products" element={<SellerProducts />}/>
+            <Route path="orders" element={<SellerOrders />}/>
+          </Route>
           <Route path="/" element={<Home />} />
           <Route path="/market" element={<Market />} />
           <Route path="/user" element={<ProtectedRoute><Account/></ProtectedRoute>}>
