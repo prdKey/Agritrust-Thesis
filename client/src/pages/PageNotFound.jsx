@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
       <h1 className="text-6xl font-bold text-gray-300">404</h1>
@@ -9,12 +10,12 @@ const NotFound = () => {
         The page you are looking for doesn’t exist.
       </p>
 
-      <Link
-        to="/market"
-        className="mt-6 bg-green-600 text-white px-6 py-2 rounded"
+      <button
+        onClick={() => navigate("/")}
+        className="mt-6 bg-green-600 text-white px-6 py-2 rounded cursor-pointer"
       >
         Go Market
-      </Link>
+      </button>
     </div>
   );
 };

@@ -1,19 +1,110 @@
 import { useAuth } from "../../context/AuthContext.jsx";
-import { useNavigate} from "react-router-dom";
+import { useNavigate, useSearchParams} from "react-router-dom";
+import { ShoppingCart, Search, Bell, BadgeQuestionMark } from "lucide-react";
+import { useState, useEffect} from "react";
 
 export default function Header() {
-  
-  const {user} = useAuth()
+  const [searchParams] = useSearchParams();
+  const keyword = searchParams.get("keyword") || ""; 
+  const [search, setSearch] = useState("");
+  const { user } = useAuth();
   const navigate = useNavigate();
+  useEffect(()=>
+  {
+    setSearch(keyword)
+
+  },[keyword])
+
+  const handleSearch = () =>
+  {
+    if(!search) return;
+    navigate(`/search?keyword=${search}`)
+  }
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <nav className="min-w-screen bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 onClick={() => navigate("/market")} className="text-xl font-bold text-green-600 hover:cursor-pointer">AgriTrust</h1>
-          {user? <div onClick={() => navigate("/user")} className="flex items-center gap-2 hover:cursor-pointer">
-            <img src="https://scontent.fmnl13-4.fna.fbcdn.net/v/t39.30808-6/473190189_2409978942668057_1153590623084014352_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEmfTFqz6sX-yeUw5KR5HgVJTGcrxECPCAlMZyvEQI8IKbs3-YBoHdiIQ7DQVpDE5DpoFvUM-aE2yPfdr1cbF4z&_nc_ohc=HQP0ahilk34Q7kNvwF-IFz9&_nc_oc=AdkeoNZGCwiQLJYTDm5dbcxAhzkdvftMGiVC1Be26Y-5mRQWzKLodSIBIwyZQxzuz67H__B07zhKpYJ1YK_heeKw&_nc_zt=23&_nc_ht=scontent.fmnl13-4.fna&_nc_gid=Mg7Z898MlPiZiNLQImYZgA&oh=00_AfoYcmrBRW5AUDtwM8nz3Blpnv_0YujwKDmS8NvkuoDqJg&oe=6972E1F4" alt="Example" className="bg-amber-300 rounded-full w-7 h-7"/>
-            <span className="">{user.firstName + " " + user.lastName}</span>
-          </div> : <button onClick={() => navigate("/login") } className="cursor-pointer bg-green-600 text-white px-4 py-1 rounded">Login</button>}
+    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white shadow-md">
+      <nav className="max-w-7xl w-full px-4 py-3 mx-auto flex flex-col sm:flex-col gap-2">
+
+        {/* Top links - desktop only */}
+        <div className="hidden sm:flex items-center justify-between mb-2">
+          <ul className="flex gap-2 text-green-600 text-sm">
+            <li onClick={() => navigate("/seller")} className="cursor-pointer hover:text-green-500">Seller Centre</li>
+            <li>|</li>
+            <li onClick={() => navigate("/seller")} className="cursor-pointer hover:text-green-500">Start Selling</li>
+            <li>|</li>
+            <li onClick={() => navigate("/logistic")} className="cursor-pointer hover:text-green-500">Logistic Centre</li>
+          </ul>
+
+          <div className="flex items-center gap-4">
+            <ul className="flex gap-4 text-green-600 text-sm">
+              <li onClick={() => navigate("/user/notifications")} className="cursor-pointer hover:text-green-500 flex items-center gap-1">
+                <Bell size={15} /> Notifications
+              </li>
+              <li onClick={() => navigate("/about")} className="cursor-pointer hover:text-green-500 flex items-center gap-1">
+                <BadgeQuestionMark size={15} /> About
+              </li>
+            </ul>
+            <div >
+              {user ? (
+                <div onClick={() => navigate("/user")} className="flex items-center gap-2 cursor-pointer">
+                  <img alt="Profile" className="bg-amber-300 rounded-full w-6 h-6" />
+                  {/* Full name only on desktop */}
+                  <span >{user.firstName + " " + user.lastName}</span>
+                </div>
+              ) : (
+                <button onClick={() => navigate("/login")} className="hidden sm:block bg-green-600 text-white px-4 py-1 rounded">
+                  Login
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Main row: Logo, Search, Profile+Cart */}
+        <div className="flex items-center justify-between w-full">
+          
+          {/* Logo */}
+          <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
+            <img className="w-8 h-8 object-contain" src="/icon/AgritrustIcon.png" alt="AgriTrust Logo" />
+            {/* Logo text hidden on mobile */}
+            <h1 className="hidden md:block text-xl font-bold text-green-600">AgriTrust</h1>
+          </div>
+
+          {/* Search bar */}
+          <div className="flex max-w-xl w-full mx-4">
+            <div className="flex w-full">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                type="text"
+                placeholder="Search products..."
+                className="w-full border border-gray-300 rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-600"
+              />
+              <button onClick={handleSearch} className="bg-green-600 hover:bg-green-500 cursor-pointer text-white rounded-r-lg px-4 flex items-center justify-center">
+                <Search />
+              </button>
+            </div>
+            <div onClick={() => navigate("/cart")} className="cursor-pointer hover:text-green-500 text-green-600 flex items-center sm:ml-10 ml-3">
+                <ShoppingCart size={28} />
+            </div>
+          </div>
+
+          {/* Profile/Login + Cart */}
+          <div className="flex items-center gap-4">
+            <div className="sm:hidden">
+              {user ? (
+                <div onClick={() => navigate("/user")} className="flex items-center gap-2 cursor-pointer">
+                  <img alt="Profile" className="bg-amber-300 rounded-full w-6 h-6" />
+                  {/* Full name only on desktop */}
+                  <span className="hidden sm:block">{user.firstName + " " + user.lastName}</span>
+                </div>
+              ) : (
+                <button onClick={() => navigate("/login")} className="hidden sm:block bg-green-600 text-white px-4 py-1 rounded">
+                  Login
+                </button>
+              )}
+              
+            </div>
+          </div>
         </div>
       </nav>
     </header>

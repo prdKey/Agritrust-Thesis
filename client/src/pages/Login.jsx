@@ -1,14 +1,15 @@
 import { useAuth } from "../context/AuthContext.jsx"
 import DisconnectWalletButton from "../components/common/DisconnectWalletButton.jsx"
 import ConnectWalletButton from "../components/common/ConnectWalletButton.jsx"
-import {Link} from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 
 export default function Login() {
     const {user} = useAuth()
+    const navigate = useNavigate();
   return (
-    <div className="min-h-screen w-full flex justify-center items-center p-6">
-      <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-md text-center">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+      <div onClick={() => navigate("/")} className="absolute inset-0 bg-black/50"/>
+      <div className="z-50 bg-white shadow-xl rounded-lg p-8 w-full max-w-md text-center">
         {/* Logo */}
         <div className="flex justify-center mb-4">
           <img
@@ -24,12 +25,12 @@ export default function Login() {
         </p>
         {user ? <DisconnectWalletButton/> : <ConnectWalletButton/>}
         <div className="flex justify-center mt-2">
-            <Link
-                to="/register"
+            <p
+                onClick={() => navigate("/register")}
                 className="text-xs text-gray-400 font-light cursor-pointer hover:underline transition-colors hover:text-green-600"
             >
                 New User? Register your wallet
-            </Link>
+            </p>
         </div>
         <p className="text-xs text-gray-400 mt-6">
           By continuing, you agree to our Terms & Conditions

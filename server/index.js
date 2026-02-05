@@ -9,6 +9,7 @@ import productRoute from "./routes/Product.route.js"
 import authRoute from "./routes/Auth.route.js"
 import userRoute from "./routes/User.route.js"
 import orderRoute from "./routes/Order.route.js"
+import cartRoute from "./routes/Cart.route.js"
 
 const app = express();
 app.use(express.json());
@@ -18,6 +19,7 @@ app.use("/api/products", productRoute)
 app.use("/api/auth", authRoute)
 app.use("/api/users", userRoute)
 app.use("/api/orders", orderRoute)
+app.use("/api/carts", cartRoute)
 
 // Sync database & start server
 sequelize.sync({ alter: true }).then(() => {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { saveToken ,getToken, removeToken } from "../auth/tokenService.js";
+import { redirectByRole } from "../auth/redirectByRole.js";
 
 const API_URL = "http://localhost:3001/api";
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const login = (data) => {
     saveToken(data.token)
     setUser(data.user);
+    redirectByRole(data.user.role);
   }
   const logout = () => {
     setUser(null);

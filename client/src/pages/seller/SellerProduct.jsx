@@ -2,27 +2,29 @@ import { useState, useEffect} from "react";
 import { getProductsByUser, listProduct, updateProduct, deleteProduct} from "../../services/productService.js";
 import SellerProductCard from "../../components/common/SellerProductCard";
 import {uploadImageToPinata} from "../../services/uploadImgService.js"
-
+import {useAuth} from "../../context/AuthContext.jsx"
 
 export default function SellerProducts() {
   const [products, setProducts] = useState([]);
+  const [loading, setloading] = useState(false)
+  const {user} = useAuth();
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-            const data = await getProductsByUser();
+            const data = await getProductsByUser(user.id);
             setProducts(data.products); // safe optional chaining
             } catch (err) {
             console.error("Failed to fetch products:", err);
             } 
         };
         fetchProducts();
-        }, []);
+        }, [user.id]);
   const [form, setForm] = useState({
     id: null,
     name: "",
     pricePerUnit: "",
-    quantity: "",
+    stock: "",
     category: "",
     imageCID: "", // base64 or url
   });
@@ -34,28 +36,17 @@ export default function SellerProducts() {
   };
 
   const handleAdd = async () => {
-    if (!form.name || !form.pricePerUnit || !form.quantity || !form.category) return;
-
-    
-
-    await listProduct({
+    if (!form.name || !form.pricePerUnit || !form.stock || !form.category) return;
+    setloading(true);
+    const data = await listProduct({
         ...form,
         pricePerUnit: Number(form.pricePerUnit),
-        quantity: Number(form.quantity),
+        stock: Number(form.stock),
         
     })
-
-    setProducts([
-        ...products,
-        {
-            ...form,
-            pricePerUnit: Number(form.pricePerUnit),
-            quantity: Number(form.quantity),
-        }
-    ])
-    console.log(products)
-
+    setProducts(data.products)
     resetForm();
+    setloading(false);
   };
 
   const handleEdit = (product) => {
@@ -64,36 +55,44 @@ export default function SellerProducts() {
   };
 
   const handleUpdate = async () => {
-    await updateProduct({
+    if (!form.name || !form.pricePerUnit || !form.stock || !form.category) return;
+    setloading(true);
+    const data = await updateProduct({
         ...form,
         pricePerUnit: Number(form.pricePerUnit),
-        quantity: Number(form.quantity),
+        stock: Number(form.stock),
         
     })
-    setProducts(products.map((p) => (p.id === form.id ? form : p)));
+    setProducts(data.products);
+    setloading(false)
     setIsEditing(false);
     resetForm();
   };
 
   const handleDelete = async (id) =>
   {
-    await deleteProduct(id)
-    setProducts(products.filter(product => product.id !== id))
+    const data = await deleteProduct(id)
+    setProducts(data.products)
+    setIsEditing(false);
+    resetForm();
   }
 
   const resetForm = () => {
-    setForm({ id: null, name: "", pricePerUnit: "", quantity: "", category: "", imageCID: "" });
+    setForm({ id: null, name: "", pricePerUnit: "", stock: "", category: "", imageCID: "" });
   };
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
+      setloading(true)
       const cid = await uploadImageToPinata(file)
       console.log("CID: " + cid)
       setForm({ ...form, [e.target.name]: cid });
     } catch (err) {
       console.error("Error uploading file:", err);
+    } finally{
+      setloading(false)
     }
   };
 
@@ -148,9 +147,9 @@ export default function SellerProducts() {
           className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
         />
         <input
-          name="quantity"
+          name="stock"
           type="number"
-          value={form.quantity}
+          value={form.stock}
           onChange={handleChange}
           placeholder="Stock"
           className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -161,11 +160,11 @@ export default function SellerProducts() {
             type="file"
             accept="image/*"
             onChange={handleUpload}
-            className="flex-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="flex-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer"
           />
           {form.imageCID && (
             <img
-              src={form.imageCID}
+              src={`https://bronze-magnificent-constrictor-556.mypinata.cloud/ipfs/${form.imageCID}`}
               alt="Preview"
               className="mt-2 h-32 rounded object-cover"
             />
@@ -175,7 +174,8 @@ export default function SellerProducts() {
         {!isEditing ? (
           <button
             onClick={handleAdd}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 md:col-span-2"
+            disabled={loading}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 md:col-span-2 cursor-pointer"
           >
             Add Product
           </button>
@@ -183,7 +183,8 @@ export default function SellerProducts() {
           <>
             <button
               onClick={handleUpdate}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 md:col-span-2"
+              disabled={loading}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 md:col-span-2 cursor-pointer"
             >
               Update Product
             </button>
@@ -193,7 +194,7 @@ export default function SellerProducts() {
                 setIsEditing(false);
                 resetForm();
               }}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-gray-500 md:col-span-2"
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-gray-500 md:col-span-2 cursor-pointer"
             >
               Cancel
             </button>
@@ -202,9 +203,9 @@ export default function SellerProducts() {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredProducts.map((product) => (
-            <SellerProductCard product={product} handleEdit={handleEdit} handleDelete={handleDelete}/>
+            <SellerProductCard key={product.id} product={product} handleEdit={handleEdit} handleDelete={handleDelete}/>
         ))}
         </div>
     </div>
