@@ -56,15 +56,13 @@ export const verifySignature = async (req, res) => {[]
     userData.nonce = generateNonce();
     await userData.save();
     // fetch userStat
-    const userStat = await contract.getBuyerStats(walletAddress)
+    //const userStat = await contract.getBuyerStats(walletAddress)
 
     const user = 
     {
       ...userData.dataValues,
-      totalOrders: Number(userStat.totalOrders),
-      activeOrders: Number(userStat.activeOrders),
-      agtSpent: Number(userStat.agtSpent)
     }
+   
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
@@ -89,15 +87,12 @@ export const getMe = async (req, res) => {
     
     if (!userData) return res.status(401).json({ message: "Unauthorized" });
     
-    const userStat = await contract.getBuyerStats(userData.walletAddress)
+    //const userStat = await contract.getBuyerStats(userData.walletAddress)
    
  
     const user = 
     {
-      ...userData.dataValues,
-      totalOrders: Number(userStat.totalOrders),
-      activeOrders: Number(userStat.activeOrders),
-      agtSpent: Number(userStat.agtSpent)
+      ...userData.dataValues
     }
     res.json({ user });
   } catch (err) {

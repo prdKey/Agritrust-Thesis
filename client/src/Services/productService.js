@@ -2,24 +2,17 @@ import axios from "axios";
 import { getToken } from "../auth/tokenService.js";
 
 
-const API_URL = "http://localhost:3001/api";
+const API_URL = import.meta.env.VITE_API_URL;
     
 export const getAllProducts = async () => {
-    const res = await axios.get(`${API_URL}/products`, {
-        headers: {
-            Authorization: `Bearer ${getToken()}`
-        }
-    });
+    const res = await axios.get(`${API_URL}/products/`);
     return res.data
 }
 
-export const getProductsByUser = async () =>
+export const getProductsByUser = async (id) =>
 {
-    const res = await axios.get(`${API_URL}/products/user`, {
-        headers: {
-            Authorization: `Bearer ${getToken()}`
-        }
-    });
+    console.log(id)
+    const res = await axios.get(`${API_URL}/products/user/${id}`);
     return res.data
 }
 
@@ -32,7 +25,6 @@ export const listProduct = async (productData) => {
         }
     )
     return res.data;
- 
 };
 
 export const updateProduct = async (productData) =>
@@ -58,4 +50,24 @@ export const deleteProduct = async (id) =>
     )
 
     return res.data
+}
+
+export const getProductById = async (id) =>
+{
+    const res = await axios.get(`${API_URL}/products/${id}`)
+
+    return res.data
+}
+
+export const buyProduct = async (productData) =>
+{   
+    
+    const res = await axios.post(`${API_URL}/products/checkout`, productData,
+        {
+            headers: {
+                Authorization: `Bearer ${getToken()}`
+            }
+        }
+    )
+    return res.data;
 }

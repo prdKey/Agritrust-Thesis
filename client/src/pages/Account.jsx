@@ -2,6 +2,8 @@
 import Sidebar  from "../components/common/Sidebar.jsx";
 import { Outlet } from "react-router-dom";
 import { LayoutDashboard, Package, User ,Bell, Settings, LogOut, Menu, X } from "lucide-react";
+import { useEffect} from "react";
+import { useNavigate } from "react-router-dom";
 
 function Account() {
   const menu = [

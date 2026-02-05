@@ -5,7 +5,7 @@
 export const redirectByRole = (role) => {
   switch (role) {
     case "USER":
-      window.location.href = "/market";      // client marketplace
+      window.location.href = "/";      // client marketplace
       break;
     case "SELLER":
       window.location.href = "/seller/dashboard";  // seller dashboard
