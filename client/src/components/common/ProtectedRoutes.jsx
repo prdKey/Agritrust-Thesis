@@ -5,5 +5,5 @@ import  Loader from "../common/Loader.jsx";
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <Loader></Loader>;
-  return user ? children : <Navigate to="/login" />;
+  return user ? children : <Navigate to="/" />;
 }
