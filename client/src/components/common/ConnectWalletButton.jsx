@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { loginWithWallet, verifySignature} from "../../auth/authService.js";
-import { redirectByRole } from "../../auth/redirectByRole.js";
 import { ethers } from "ethers";
 
 export default function ConnectWalletButton() {
@@ -21,7 +20,6 @@ export default function ConnectWalletButton() {
       const signature = await signer.signMessage(`AgriTrust Login: ${nonce}`);
       const data = await verifySignature(address, signature);
       login(data);
-      redirectByRole(data.user.role);
     } catch (err) {
       console.error(err);
       alert("Login failed: " + err.response.data.message);

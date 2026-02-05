@@ -1,11 +1,21 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 import { X, Menu } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Sidebar({ menuItems }) {
-  const [active, setActive] = useState("Dashboard");
+  const location = useLocation();
+  const locationTrim = location.pathname.split("/")
+  const path = locationTrim[2] || "dashboard";
+  const [active, setActive] = useState("dashboard");
   const [open, setOpen] = useState(false); // Mobile menu state
   const navigate = useNavigate();
+  useEffect(()=>
+  {
+    setActive(path)
+  },[path])
+
+
 
   return (
     <>
@@ -25,7 +35,7 @@ export default function Sidebar({ menuItems }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-700 text-green-600">Seller Panel</h1>
+          <h1 className="text-xl font-bold text-green-600">Seller Panel</h1>
           <button
             className="md:hidden"
             onClick={() => setOpen(false)}
@@ -40,12 +50,12 @@ export default function Sidebar({ menuItems }) {
             <button
               key={item.name}
               onClick={() => {
-                setActive(item.name);
+                setActive(item.path);
                 navigate(item.path);
                 setOpen(false); // Close sidebar on mobile after navigation
               }}
               className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer w-full text-left transition-colors duration-200
-                ${active === item.name
+                ${active === item.path
                   ? "bg-green-500 text-white"
                   : "text-gray-700 hover:bg-gray-100"
                 }`}

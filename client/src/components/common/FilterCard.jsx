@@ -1,8 +1,6 @@
 import React from "react";
 
 const FilterCard = ({
-  search,
-  setSearch,
   category,
   setCategory,
   priceRange,
@@ -13,18 +11,8 @@ const FilterCard = ({
   setInStockOnly,
 }) => {
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 space-y-4 sticky top-25">
-      {/* Search */}
-      <div>
-        <h3 className="text-green-600 font-semibold mb-2">Search</h3>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search products..."
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-600"
-        />
-      </div>
+    <div className="bg-white shadow-md rounded-lg p-4 space-y-4 sticky top-20">
+      
 
       {/* Category */}
       <div>
