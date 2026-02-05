@@ -1,5 +1,4 @@
 import axios from "axios";
-import dotenv
 
 export const uploadImageToPinata = async (file) => {
   try {
