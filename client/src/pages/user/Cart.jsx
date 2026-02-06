@@ -4,15 +4,14 @@ import {
   getBuyerCarts,
   updateCartQuantity,
 } from "../../services/cartService.js";
-import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function CartPage() {
+
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+
 
   useEffect(() => {
-    if (!user) return;
 
     const fetchCartItems = async () => {
       const data = await getBuyerCarts();
@@ -20,7 +19,7 @@ export default function CartPage() {
     };
 
     fetchCartItems();
-  }, [user?.id]);
+  }, []);
 
   const increment = async (productId, quantity) => {
     setLoading(true);

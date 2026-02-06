@@ -1,39 +1,18 @@
 import DashboardCard from "../../components/common/DashboardCard.jsx";
-import RecentCard from "../../components/common/RecentCard.jsx";
-import { useAuth } from "../../context/AuthContext.jsx";
-import { useEffect, useState} from "react";
-import {getRecentBuyerOrders} from "../../services/orderService.js"
+
+import { useUserContext } from "../../context/UserContext.jsx";
 
 const Dashboard = () => {
-  const {user} = useAuth()
-  const [loading, setLoading] = useState(true);
-  const [recentOrders, setRecentOrders] = useState([]);
+  const {user} = useUserContext();
 
-  useEffect(() => {
-    const fetchRecentOrders = async () => {
-      try{
-        const data = await getRecentBuyerOrders(user.walletAddress, 5)
-        setRecentOrders(data.orders)
-      }catch(err)
-      {
-        console.error("Failed to fetch products:", err);
-      }finally{
-        setLoading(false)
-      }
-    }
-
-    fetchRecentOrders();
-
-  }, [user]);
-
+  if (!user) return null; // prevent render
 
   return (
     <div className="h-full rounded-lg bg-gray-100 p-6 space-y-6">
-      {/* Top Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <DashboardCard
           title="Total Orders"
-          value={user.totalOrders}
+          value={user.totalOrders ?? 0}
           description="All purchases you have made on the marketplace"
           icon="🌾"
           bg="bg-green-600"
@@ -41,7 +20,7 @@ const Dashboard = () => {
 
         <DashboardCard
           title="Active Orders"
-          value={user.activeOrders}
+          value={user.activeOrders ?? 0}
           description="Orders currently being processed or shipped"
           icon="📦"
           bg="bg-blue-600"
@@ -49,18 +28,14 @@ const Dashboard = () => {
 
         <DashboardCard
           title="AGT Spent"
-          value={user.agtSpent}
+          value={user.agtSpent ?? 0}
           description="Total AGT tokens spent on completed purchases"
           icon="💰"
           bg="bg-emerald-600"
         />
       </div>
 
-      {/* Bottom Recent Activity Card */}
-      <RecentCard
-        title="Recent Orders"
-        items={recentOrders}
-      />
+      
     </div>
   );
 };

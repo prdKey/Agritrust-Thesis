@@ -1,7 +1,8 @@
 import axios from "axios";
-import { getToken } from "../auth/tokenService.js";
+import { getToken } from "./tokenService";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
 
 const authHeader = () => ({
   Authorization: `Bearer ${getToken()}`,

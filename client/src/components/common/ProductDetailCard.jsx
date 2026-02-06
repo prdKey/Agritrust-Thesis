@@ -1,14 +1,40 @@
 import { MapPin, ShoppingCart } from "lucide-react";
 import {useState} from "react"
 import {addToCart} from "../../services/cartService.js"
+import Notification from "./Notification.jsx";
+import { useUserContext } from "../../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
+import { buyProduct } from "../../services/orderService.js";
 
 export default function ProductDetails({ product }) {
+  const {user} = useUserContext();
   const rating = product.rating ?? 5;
   const [quantity, setQuantity] = useState(1);
+  const navigate = useNavigate();
+
+
+
+  const [notifications, setNotifications] = useState([]);
+
+  const addNotification = (msg, type) => {
+    const id = Date.now();
+    setNotifications([...notifications, { id, message: msg, type }]);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(notifications.filter((n) => n.id !== id));
+  };
 
   const handleAddToCart = async () =>
-  {
+  { 
     await addToCart({...product, quantity});
+    addNotification(`"${product.name}" added to your cart!`, "success")
+  }
+
+  const handleBuy = async () =>
+  {
+    
+    await buyProduct(product.id, quantity);
   }
   const increment = () => setQuantity((q) => Math.min(q + 1, product.stock));
   const decrement = () => setQuantity((q) => Math.max(q - 1, 1));
@@ -78,18 +104,38 @@ export default function ProductDetails({ product }) {
             </div>
 
             {/* Actions – always at bottom */}
-            <div onClick={handleAddToCart} className="flex gap-3 mt-6">
-                <button className="cursor-pointer flex-1 border border-green-600 text-green-600 rounded-lg py-2 hover:bg-green-50 transition">
-                Add to Cart
+            {user && user.walletAddress.toLowerCase() === product.sellerAddress.toLowerCase() ? 
+              <div className="flex mt-6">
+                <button disabled={true} className="flex-1 border border-gray-500 text-gray-500 rounded-lg py-2">
+                    You cannot purchase your own product.
+                </button>
+              </div> :
+              <div className="flex gap-3 mt-6">
+                <button onClick={() => user ? handleAddToCart() : navigate("/login")} className="cursor-pointer flex-1 border border-green-600 text-green-600 rounded-lg py-2 hover:bg-green-50 transition">
+                  Add to Cart
                 </button>
 
-                <button className="cursor-pointer flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 transition flex items-center justify-center gap-2">
+                <button onClick={() => user ? handleBuy() : navigate("/login")} className="cursor-pointer flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 transition flex items-center justify-center gap-2">
                 <ShoppingCart className="w-4 h-4" />
                   Buy Now
                 </button>
             </div>
+            }
+            
+            
         </div>
       </div>
+
+      {/* Notifications container */}
+      {notifications.map((n) => (
+        <Notification
+          key={n.id}
+          message={n.message}
+          type={n.type}
+          onClose={() => removeNotification(n.id)}
+        />
+      ))}
+
     </div>
   );
 }

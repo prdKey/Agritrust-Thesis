@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useUserContext } from "../../context/UserContext.jsx";
 
 export default function Profile() {
-  const {user} = useAuth();
+
+  const { user } = useUserContext();
+
+  // ✅ Always call hooks, provide safe defaults
   const [username, setUsername] = useState(user.walletAddress);
-  const [name, setName] = useState(user.firstName + " " + user.lastName);
+  const [name, setName] = useState(`${user.firstName} ${user.lastName}`)
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone);
   const [gender, setGender] = useState(user.gender);
-  const [dob, setDob] = useState(user.dob); // example
+  const [dob, setDob] = useState(user.dob);
+  
 
   const handleSave = (e) => {
     e.preventDefault();
