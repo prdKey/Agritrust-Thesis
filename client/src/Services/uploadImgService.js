@@ -1,4 +1,5 @@
 import axios from "axios";
+const PINATA_TOKEN = import.meta.env.VITE_PINATA_TOKEN;
 
 export const uploadImageToPinata = async (file) => {
   try {
@@ -10,7 +11,7 @@ export const uploadImageToPinata = async (file) => {
       formData,
       {
         headers: {
-          Authorization: `Bearer `
+          Authorization: `Bearer ${PINATA_TOKEN}`
         },
       }
     );

@@ -82,7 +82,6 @@ export default function Product() {
             try {
                 setloading(true);
                 const data = await getProductById(id);
-                console.log(data)
                 setProduct(data.product); // safe optional chaining
             } catch (err) {
                 console.error("Failed to fetch products:", err);

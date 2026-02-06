@@ -25,26 +25,12 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-// Get owner of a product
-export const getProductOwner = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    const owner = await product.getUser(); // thanks to Sequelize associations
-    res.json(owner);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 export const getProductsBySeller = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     
     const productsRaw = await productManagerContract.getProductsBySeller(user.walletAddress)
-    console.log(productsRaw)
     const products = productsRaw.map((p) => ({
         id: Number(p.id),         // BigInt -> string
         sellerAddress: p.sellerAddress,
@@ -71,7 +57,7 @@ export const getProductById = async (req, res) => {
     // Convert BigNumbers to string for JSON
     const product = {
       id: Number(productRaw.id),
-      sellerAddress: productRaw.seller,
+      sellerAddress: productRaw.sellerAddress,
       name: productRaw.name,
       imageCID: productRaw.imageCID,
       category: productRaw.category,
@@ -87,23 +73,20 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const walletAddress = req.user.walletAddress;
     const { name, stock, category ,pricePerUnit, imageCID } = req.body;
-    console.log("")
 
-    const seller = await User.findByPk(userId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.listProduct(
       name,
       imageCID,
       category,
       pricePerUnit,
       stock,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
     
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),      // BigInt -> string
@@ -125,10 +108,8 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const walletAddress = req.user.walletAddress;
     const { id, name, stock, category, pricePerUnit, imageCID } = req.body;
-    const seller = await User.findByPk(sellerId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.updateProduct(
       id,
       name,
@@ -136,10 +117,10 @@ export const updateProduct = async (req, res) => {
       category,
       pricePerUnit,
       stock,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),    // BigInt -> string
@@ -159,17 +140,14 @@ export const updateProduct = async (req, res) => {
 }
 export const deleteProduct = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const walletAddress = req.user.walletAddress
     const id = req.params.id
-    console.log(id)
-    const seller = await User.findByPk(sellerId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.deleteProduct(
       id,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),       // BigInt -> string
@@ -189,19 +167,3 @@ export const deleteProduct = async (req, res) => {
   }
 }
 
-export const buyProduct = async (req, res) =>{
-  try{
-    const userId = req.user.id
-  
-    const user = await User.findByPk(userId);
-    
-    const {id, quantity} = req.body
-
-    const tx = await orderManagerContract.buyProduct(id, quantity, user.walletAddress);
-    console.log(tx)
-    res.status(201).json(tx);
-  }catch(err){
-    console.log(err)
-  }
-  
-} 

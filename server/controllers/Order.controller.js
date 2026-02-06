@@ -1,29 +1,134 @@
-import { where } from "sequelize";
-import {contract} from "../blockchain/contract.js"
-import { User } from "../models/index.js"
+import { orderManagerContract } from "../blockchain/contract.js"
 
-// Get all products
-export const getRecentBuyerOrders = async (req, res) => {
+/* CREATE ORDER */
+export const buyProduct = async (req, res) => {
   try {
-    const { walletAddress, count } = req.query; // <-- use query for GET
+    const buyerAddress = req.user.walletAddress
+    const { productId, quantity} = req.body;
 
-    if (!walletAddress || !count) {
-      return res.status(400).json({ message: "Missing walletAddress or count" });
-    }
+    const tx = await orderManagerContract.buyProduct(productId, quantity, buyerAddress);
+    await tx.wait();
 
-    // Convert count to number because query params are strings
-    const countNum = parseInt(count, 10);
-
-    // Call the smart contract
-    const recentOrdersData = await contract.getRecentBuyerOrders(walletAddress, countNum);
-  
-
-    // Return result
-    console.log({orders: recentOrdersData})
-    res.json({ orders: recentOrders });
+    res.json({ message: "Order created successfully", txHash: tx.hash });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: err.reason || err.message });
   }
 };
 
+/* CONFIRM SHIPMENT */
+export const confirmShipment = async (req, res) => {
+  try {
+    
+    const sellerAddress = req.user.walletAddress
+    const { orderId } = req.body;
+    console.log(orderId)
+
+    const tx = await orderManagerContract.confirmShipment(orderId, sellerAddress);
+    await tx.wait();
+
+    res.json({ message: "Shipment confirmed", txHash: tx.hash });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* CONFIRM DELIVERY */
+export const confirmDelivery = async (req, res) => {
+  try {
+    const { orderId, location, providerAddress } = req.body;
+
+    const tx = await orderManagerContract.confirmDeliveryByLogistics(orderId, location, providerAddress);
+    await tx.wait();
+
+    res.json({ message: "Delivery confirmed", txHash: tx.hash });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* CONFIRM RECEIPT */
+export const confirmReceipt = async (req, res) => {
+  try {
+    const { orderId, buyerAddress } = req.body;
+
+    const tx = await orderManagerContract.confirmReceipt(orderId, buyerAddress);
+    await tx.wait();
+
+    res.json({ message: "Order completed", txHash: tx.hash });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* OPEN DISPUTE */
+export const openDispute = async (req, res) => {
+  try {
+    const { orderId, senderAddress } = req.body;
+
+    const tx = await orderManagerContract.openDispute(orderId, senderAddress);
+    await tx.wait();
+
+    res.json({ message: "Dispute opened", txHash: tx.hash });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* RESOLVE DISPUTE */
+export const resolveDispute = async (req, res) => {
+  try {
+    const { orderId, refundBuyer } = req.body;
+
+    const tx = await orderManagerContract.resolveDispute(orderId, refundBuyer);
+    await tx.wait();
+
+    res.json({ message: "Dispute resolved", txHash: tx.hash });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* GET ORDERS BY SELLER */
+export const getOrdersBySeller = async (req, res) => {
+  try {
+    const sellerAddress = req.user.walletAddress;
+    const data = await orderManagerContract.getOrdersBySeller(sellerAddress);
+    const orders = data.map((o) => (
+      {
+        id: Number(o.id),
+        productId: Number(o.productId),
+        buyerAddress: o.buyerAddress,
+        sellerAddress: o.sellerAddress,
+        quantity: Number(o.quantity),
+        totalPrice: Number(o.totalPrice),
+        pricePerUnit: Number(o.pricePerUnit),
+        name: o.name,
+        category: o.category,
+        status: Number(o.status)
+      }
+    ))
+    console.log(orders)
+    res.json({orders});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
+/* GET ORDERS BY BUYER */
+export const getOrdersByBuyer = async (req, res) => {
+  try {
+    const { buyerAddress } = req.params;
+    const orders = await orderManagerContract.getOrdersByBuyer(buyerAddress);
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};

@@ -23,7 +23,7 @@ function App() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/seller" element={<ProtectedRoute><SellerPanel/></ProtectedRoute>}>
+          <Route path="/seller" element={<ProtectedRoute ><SellerPanel/></ProtectedRoute>}>
             <Route index element={<SellerDashboard/>}/>
             <Route path="dashboard" element={<SellerDashboard />}/>
             <Route path="products" element={<SellerProducts />}/>
@@ -35,11 +35,9 @@ function App() {
             <Route path="register" element={<Register/>}/>
           </Route>
           <Route path="/search" element={<Market />} >
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register/>}/>
           </Route>
           <Route path="/products/:id" element={<Product/>}/>
-          <Route path="/user" element={<ProtectedRoute><Account/></ProtectedRoute>}>
+          <Route path="/user" element={<ProtectedRoute ><Account/></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />}/>
             <Route path="profile" element={<Profile/>}/>

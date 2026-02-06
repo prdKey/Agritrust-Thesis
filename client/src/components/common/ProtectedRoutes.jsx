@@ -1,9 +1,35 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
-import  Loader from "../common/Loader.jsx";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../../context/UserContext.jsx"
+import Loader from "./Loader";
 
-export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return <Loader></Loader>;
-  return user ? children : <Navigate to="/" />;
+export default function ProtectedRoute({ children, roles }) {
+  const { user, loading } = useUserContext();
+  const navigate = useNavigate();
+  
+  // 🔐 Redirect logic
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        navigate("/", { replace: true });
+      } else if (roles) {
+        const allowedRoles = Array.isArray(roles) ? roles : [roles];
+        if (!allowedRoles.includes(user.role)) {
+          navigate("/", { replace: true });
+        }
+      }
+    }
+  }, [user, loading, roles, navigate]);
+  
+  // ⏳ Still loading
+  if (loading) return <Loader />;
+
+  // ❌ User not ready OR redirecting
+  if (user)
+    { 
+      console.log(roles)
+    }
+  
+  // ✅ Authorized
+  return children;
 }

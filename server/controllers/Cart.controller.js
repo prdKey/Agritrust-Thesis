@@ -6,22 +6,21 @@ import { cartManagerContract } from "../blockchain/contract.js";
  */
 export const getBuyerCarts = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const walletAddress = req.user.walletAddress;
     
-    const dataRaw = await cartManagerContract.getBuyerCart(user.walletAddress);
+    const dataRaw = await cartManagerContract.getBuyerCart(walletAddress);
     const carts = dataRaw.map((data) => ({
       id: Number(data.id),
       productId: Number(data.productId),
-      buyer: data.buyer,
-      seller: data.seller,
+      buyerAddress: data.buyerAddress,
+      sellerAddress: data.sellerAddress,
       name: data.name,
       category: data.category,
       stock: Number(data.stock),
       quantity: Number(data.quantity),
       pricePerUnit: Number(data.pricePerUnit),
       totalPrice: Number(data.totalPrice),
-      exists: data.exists,
+      imageCID: data.imageCID
     }));
 
     res.status(200).json({ carts });
@@ -36,17 +35,17 @@ export const getBuyerCarts = async (req, res) => {
 export const addToCart = async (req, res) => {
   try {
     const { id, quantity } = req.body;
-    const user = await User.findByPk(req.user.id);
+    const walletAddress = req.user.walletAddress;
 
     const tx = await cartManagerContract.addToCart(
       id,
-      user.walletAddress,
+      walletAddress,
       quantity
     );
 
     await tx.wait(); // ⏳ wait for confirmation
 
-    const dataRaw = await cartManagerContract.getBuyerCart(user.walletAddress);
+    const dataRaw = await cartManagerContract.getBuyerCart(walletAddress);
 
     const carts = dataRaw.map((data) => ({
       id: Number(data.id),

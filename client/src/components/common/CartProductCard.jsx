@@ -10,7 +10,8 @@ export default function CartProductCard({ item, decrement, increment, removeItem
         <div className="flex items-center space-x-4 min-w-0">
           <input type="checkbox"  className="w-5 h-5 shrink-0" />
           <img
-            src={`https://bronze-magnificent-constrictor-556.mypinata.cloud/ipfs/${item.image}`}
+            
+            src={`https://bronze-magnificent-constrictor-556.mypinata.cloud/ipfs/${item.imageCID}`}
             alt={item.name}
             className="w-20 h-20 object-cover rounded shrink-0"
           />

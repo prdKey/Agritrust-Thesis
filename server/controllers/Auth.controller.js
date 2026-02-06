@@ -5,9 +5,11 @@ import {contract} from "../blockchain/contract.js"
 
 const generateNonce = () => Math.floor(Math.random() * 1000000).toString();
 
+
+
 export const loginWallet = async (req, res) => {
   try {
-    const { walletAddress } = req.body;
+    const { walletAddress } = req.params;
     if (!walletAddress) return res.status(400).json({ message: "Wallet address required" });
     let user = await User.findOne({ where: { walletAddress } });
     
@@ -64,7 +66,7 @@ export const verifySignature = async (req, res) => {[]
     }
    
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role, walletAddress: user.walletAddress },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -99,3 +101,59 @@ export const getMe = async (req, res) => {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+const nonces = {};
+
+export const getNonce = async (req, res) =>
+{
+  try{
+    const {walletAddress, firstName, lastName, email, mobileNumber, gender, dob} = req.body;
+    if (!walletAddress) return res.status(400).json({ message: "Wallet address required" });
+    let user = await User.findOne({ where: { walletAddress } });
+    if (!user) {
+      if(!firstName || !lastName || !email || !mobileNumber || !gender || !dob ) return res.status(401).json({message: "Please register your wallet first!"});
+      user = await User.create({
+      walletAddress,
+      lastName,
+      firstName,
+      email,
+      mobileNumber,
+      gender,
+      dob
+      });
+    }
+
+    const nonce = generateNonce();
+    nonces[walletAddress] = nonce
+
+    res.status(201).json({nonce})
+  }catch (err){
+    res.status(401).json({message: err.message})
+  }
+}
+
+export const verifySignatures = async (req, res) =>
+{
+  try{
+    const {walletAddress, signature} = req.body;
+    if (!walletAddress || !signature) return res.status(400).json({ error: "Missing data" });
+    let user = await User.findOne({ where: { walletAddress } });
+
+    const nonce = nonces[walletAddress];
+    if (!nonce) return res.status(400).json({ error: "Nonce not found" });
+
+    const message = `Sign this message to authenticate: ${nonce}`;
+    const recoveredAddress = ethers.verifyMessage(message, signature);
+
+    if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+      return res.status(401).json({ error: "Signature verification failed" });
+    }
+
+    const token = jwt.sign({ walletAddress, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    delete nonces[walletAddress];
+
+    res.json({ user: {token: token, ...user.dataValues} });
+  }catch (err) {
+    res.status(401).json({message: err.message})
+  }
+}

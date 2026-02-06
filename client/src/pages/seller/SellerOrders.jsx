@@ -1,123 +1,104 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getOrdersBySeller, confirmShipment} from "../../services/orderService";
+import {useUserContext} from "../../context/UserContext"
 
 export default function SellerOrders() {
-  const [orders, setOrders] = useState([
-    { id: 1, product: "Product A", buyer: "0x123...abc", status: "Pending" },
-    { id: 2, product: "Product B", buyer: "0x456...def", status: "Refund Requested" },
-    { id: 3, product: "Product C", buyer: "0x789...ghi", status: "Shipped" },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const {user} = useUserContext();
 
-  const [search, setSearch] = useState("");
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!user) return;
+      try {
+        const data = await getOrdersBySeller(); 
+        setOrders(data.orders || []);
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const shipOrder = (orderId) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "Shipped" } : o))
-    );
-  };
+    fetchOrders();
+  }, [user]);
 
-  const approveRefund = (orderId) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "Refunded" } : o))
-    );
-  };
+  const handleConfirmShipment = async(orderId) => {
+    await confirmShipment(orderId);
+    const data = await getOrdersBySeller(); 
+    setOrders(data.orders || []);
+  }
 
-  const rejectRefund = (orderId) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: "Shipped" } : o))
-    );
-  };
 
-  // Filter orders based on search input
-  const filteredOrders = orders.filter((order) =>
-    order.id.toString().includes(search)
-  );
+  if (loading) return <div className="p-6">Loading orders...</div>;
+  if (!orders.length) return <div className="p-6">No orders yet.</div>;
 
   return (
-    <div className="min-h-screen rounded-lg bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Seller Orders</h1>
+    <div className="p-6 bg-gray-100 min-h-screen rounded-lg space-y-6">
+      <h1 className="text-2xl font-bold mb-4">Orders Received</h1>
 
-      {/* Search bar */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by Order ID"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-        />
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gray-100">
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="py-3 px-4 text-left">Order ID</th>
-              <th className="py-3 px-4 text-left">Product</th>
-              <th className="py-3 px-4 text-left">Buyer</th>
-              <th className="py-3 px-4 text-left">Status</th>
-              <th className="py-3 px-4 text-left">Action</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Order ID</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Buyer</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Product</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quantity</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Total Price</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
+              <th className="px-4 py-2 text-sm font-medium text-gray-700">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">{order.id}</td>
-                  <td className="py-3 px-4">{order.product}</td>
-                  <td className="py-3 px-4">{order.buyer}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm font-medium ${
-                        order.status === "Shipped"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "Refund Requested"
-                          ? "bg-red-100 text-red-800"
-                          : order.status === "Refunded"
-                          ? "bg-gray-200 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
+          <tbody className="divide-y divide-gray-200">
+            {orders.map((order) => (
+              <tr key={order.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2 text-sm">{order.id}</td>
+                <td className="px-4 py-2 text-sm">{order.buyerAddress}</td>
+                <td className="px-4 py-2 text-sm">{order.name}</td>
+                <td className="px-4 py-2 text-sm">{order.quantity}</td>
+                <td className="px-4 py-2 text-sm">{order.totalPrice} AGT</td>
+                <td className="px-4 py-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      order.status === 1
+                        ? "bg-yellow-100 text-yellow-800"
+                        : order.status === 2
+                        ? "bg-blue-100 text-blue-800"
+                        : order.status === 3
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {order.status === 1
+                      ? "PENDING"
+                      : order.status === 2
+                      ? "SHIPPED"
+                      : order.status === 3
+                      ? "DELIVERED"
+                      : "UNKNOWN"}
+                  </span>
+                </td>
+                <td className="px-4 py-2 space-x-2">
+                  {order.status === 1 && (
+                    <button
+                      onClick={() => handleConfirmShipment(order.id)}
+                      className="px-2 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-500"
                     >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 space-x-2">
-                    {order.status === "Pending" && (
-                      <button
-                        onClick={() => shipOrder(order.id)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                      >
-                        Ship
-                      </button>
-                    )}
-                    {order.status === "Refund Requested" && (
-                      <>
-                        <button
-                          onClick={() => approveRefund(order.id)}
-                          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
-                        >
-                          Approve Refund
-                        </button>
-                        <button
-                          onClick={() => rejectRefund(order.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                        >
-                          Reject Refund
-                        </button>
-                      </>
-                    )}
-                    {(order.status === "Shipped" || order.status === "Refunded") && (
-                      <span>—</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="text-center py-4 text-gray-500">
-                  No orders found.
+                      Mark Shipped
+                    </button>
+                  )}
+                  {order.status === 2 && (
+                    <button
+                  
+                      className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Mark Delivered
+                    </button>
+                  )}
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>

@@ -3,7 +3,7 @@ export const ORDER_MANAGER_ABI = [
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "provider",
 				"type": "address"
 			}
 		],
@@ -97,6 +97,67 @@ export const ORDER_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "_agtToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_productManager",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "InactiveProduct",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InsufficientStock",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidOrderState",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidQuantity",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotAuthorized",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotBuyer",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotDisputed",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotLogistics",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotSeller",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -111,22 +172,6 @@ export const ORDER_MANAGER_ABI = [
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_agtToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_productManager",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
 	},
 	{
 		"inputs": [
@@ -151,12 +196,17 @@ export const ORDER_MANAGER_ABI = [
 		"type": "error"
 	},
 	{
+		"inputs": [],
+		"name": "PaymentFailed",
+		"type": "error"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "provider",
 				"type": "address"
 			}
 		],
@@ -169,7 +219,7 @@ export const ORDER_MANAGER_ABI = [
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "provider",
 				"type": "address"
 			}
 		],
@@ -180,7 +230,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -205,7 +255,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -218,15 +268,15 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
 			},
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "address",
-				"name": "buyerAddress",
+				"name": "buyer",
 				"type": "address"
 			}
 		],
@@ -237,7 +287,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -250,7 +300,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -263,7 +313,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -276,7 +326,7 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
@@ -308,7 +358,7 @@ export const ORDER_MANAGER_ABI = [
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "provider",
 				"type": "address"
 			}
 		],
@@ -396,7 +446,7 @@ export const ORDER_MANAGER_ABI = [
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "buyerAddress",
+				"name": "buyer",
 				"type": "address"
 			}
 		],
@@ -425,21 +475,6 @@ export const ORDER_MANAGER_ABI = [
 						"type": "address"
 					},
 					{
-						"internalType": "string",
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "category",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stock",
-						"type": "uint256"
-					},
-					{
 						"internalType": "uint256",
 						"name": "quantity",
 						"type": "uint256"
@@ -455,12 +490,22 @@ export const ORDER_MANAGER_ABI = [
 						"type": "uint256"
 					},
 					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "category",
+						"type": "string"
+					},
+					{
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
 					}
 				],
-				"internalType": "struct OrderManager.Result[]",
+				"internalType": "struct OrderManager.Order[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -472,7 +517,7 @@ export const ORDER_MANAGER_ABI = [
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "sellerAddress",
+				"name": "seller",
 				"type": "address"
 			}
 		],
@@ -501,21 +546,6 @@ export const ORDER_MANAGER_ABI = [
 						"type": "address"
 					},
 					{
-						"internalType": "string",
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "category",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stock",
-						"type": "uint256"
-					},
-					{
 						"internalType": "uint256",
 						"name": "quantity",
 						"type": "uint256"
@@ -531,12 +561,22 @@ export const ORDER_MANAGER_ABI = [
 						"type": "uint256"
 					},
 					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "category",
+						"type": "string"
+					},
+					{
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
 					}
 				],
-				"internalType": "struct OrderManager.Result[]",
+				"internalType": "struct OrderManager.Order[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -649,6 +689,21 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "uint256",
 				"name": "totalPrice",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pricePerUnit",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "category",
+				"type": "string"
 			},
 			{
 				"internalType": "enum OrderManager.OrderStatus",

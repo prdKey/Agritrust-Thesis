@@ -2,14 +2,17 @@ import { useState, useEffect} from "react";
 import { getProductsByUser, listProduct, updateProduct, deleteProduct} from "../../services/productService.js";
 import SellerProductCard from "../../components/common/SellerProductCard";
 import {uploadImageToPinata} from "../../services/uploadImgService.js"
-import {useAuth} from "../../context/AuthContext.jsx"
+import { useUserContext } from "../../context/UserContext.jsx";
+import Notification from "../../components/common/Notification.jsx";
 
 export default function SellerProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setloading] = useState(false)
-  const {user} = useAuth();
+  const {user} = useUserContext();
 
     useEffect(() => {
+        if (!user) return;
+        
         const fetchProducts = async () => {
             try {
             const data = await getProductsByUser(user.id);
@@ -19,7 +22,19 @@ export default function SellerProducts() {
             } 
         };
         fetchProducts();
-        }, [user.id]);
+        }, [user]);
+
+  const [notifications, setNotifications] = useState([]);
+
+  const addNotification = (msg, type) => {
+    const id = Date.now();
+    setNotifications([...notifications, { id, message: msg, type }]);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(notifications.filter((n) => n.id !== id));
+  };
+  
   const [form, setForm] = useState({
     id: null,
     name: "",
@@ -45,6 +60,7 @@ export default function SellerProducts() {
         
     })
     setProducts(data.products)
+    addNotification(`Product "${form.name}" added successfully!`, "success");
     resetForm();
     setloading(false);
   };
@@ -207,7 +223,18 @@ export default function SellerProducts() {
         {filteredProducts.map((product) => (
             <SellerProductCard key={product.id} product={product} handleEdit={handleEdit} handleDelete={handleDelete}/>
         ))}
-        </div>
+      </div>
+
+      {/* Notifications container */}
+      {notifications.map((n) => (
+        <Notification
+          key={n.id}
+          message={n.message}
+          type={n.type}
+          onClose={() => removeNotification(n.id)}
+        />
+      ))}
+
     </div>
   );
 }

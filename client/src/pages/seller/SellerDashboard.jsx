@@ -4,7 +4,7 @@ import { Package, ShoppingCart, Coins, BarChart3} from "lucide-react";
 import MetricCard from "../../components/common/MetricCard";
 import { useEffect, useState } from "react";
 import { getSellerStats } from "../../services/statsService";
-import { useAuth } from "../../context/AuthContext";
+import { useUserContext } from "../../context/UserContext";
 
 const barData = [
   { name: "Product A", sales: 400 },
@@ -15,18 +15,19 @@ const barData = [
 const COLORS = ["#3b82f6", "#22c55e", "#ef4444"];
 
 export default function SellersDashboard() {
-  const {user} = useAuth();
+  const { user } = useUserContext();
   const [stats, setStats] = useState({});
-
   useEffect(() =>
     {
+      if (!user) return;
+
       const fetchData = async () => {
         const data = await getSellerStats(user.walletAddress)
         setStats(data.stats)
       };
 
       fetchData();
-    }, [user.walletAddress]);
+    }, [user]);
 
   return (
     <div className="min-h-screen rounded-lg bg-gray-100 p-6">

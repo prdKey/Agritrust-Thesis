@@ -1,10 +1,9 @@
-import { useAuth } from "../context/AuthContext.jsx"
-import DisconnectWalletButton from "../components/common/DisconnectWalletButton.jsx"
-import ConnectWalletButton from "../components/common/ConnectWalletButton.jsx"
+import { useUserContext } from "../context/UserContext.jsx"
+import ConnectButton from "../components/common/connectButton.jsx"
 import {Link, useNavigate} from "react-router-dom"
 
 export default function Login() {
-    const {user} = useAuth()
+    const {user} = useUserContext()
     const navigate = useNavigate();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
@@ -23,7 +22,7 @@ export default function Login() {
         <p className="text-gray-500 mb-6">
             {user ? `Logged in as ${user.firstName}` : "Connect your wallet to continue."}
         </p>
-        {user ? <DisconnectWalletButton/> : <ConnectWalletButton/>}
+        {user ? <ConnectButton text={"dwadwadwa"}/> : <ConnectButton text={"dwadwadwa"}/>}
         <div className="flex justify-center mt-2">
             <p
                 onClick={() => navigate("/register")}
