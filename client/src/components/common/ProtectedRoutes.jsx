@@ -25,10 +25,7 @@ export default function ProtectedRoute({ children, roles }) {
   if (loading) return <Loader />;
 
   // ❌ User not ready OR redirecting
-  if (user)
-    { 
-      console.log(roles)
-    }
+ 
   
   // ✅ Authorized
   return children;

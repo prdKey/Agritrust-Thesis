@@ -3,7 +3,7 @@ import { useNavigate, useLocation} from "react-router-dom";
 import { X, Menu } from "lucide-react";
 import { useEffect } from "react";
 
-export default function Sidebar({ menuItems }) {
+export default function Sidebar({ menuItems, title}) {
   const location = useLocation();
   const locationTrim = location.pathname.split("/")
   const path = locationTrim[2] || "dashboard";
@@ -35,7 +35,7 @@ export default function Sidebar({ menuItems }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-green-600">Seller Panel</h1>
+          <h1 className="text-xl font-bold text-green-600">{title}</h1>
           <button
             className="md:hidden"
             onClick={() => setOpen(false)}
