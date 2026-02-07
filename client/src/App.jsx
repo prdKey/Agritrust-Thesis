@@ -17,6 +17,11 @@ import SellerProducts from "./pages/seller/SellerProduct.jsx";
 import SellerOrders from "./pages/seller/SellerOrders.jsx"
 import Product from "./pages/user/Product.jsx";
 import Cart from "./pages/user/Cart.jsx";
+import Orders from "./pages/user/Orders.jsx"
+import LogisticPanel from "./pages/logistic/LogisticPanel.jsx"
+import LogisticDashboard from "./pages/logistic/LogisticDashboard.jsx";
+import LogisticAvailableOrders from "./pages/logistic/LogisticAvailableOrder.jsx";
+import LogisticOrders from "./pages/logistic/LogisticOrder.jsx";
 
 function App() {
   return (
@@ -28,6 +33,12 @@ function App() {
             <Route path="dashboard" element={<SellerDashboard />}/>
             <Route path="products" element={<SellerProducts />}/>
             <Route path="orders" element={<SellerOrders />}/>
+          </Route>
+          <Route path="/logistic" element={<ProtectedRoute ><LogisticPanel/></ProtectedRoute>}>
+            <Route index element={<LogisticDashboard/>}/>
+            <Route path="dashboard" element={<LogisticDashboard/>}/>
+            <Route path="available-orders" element={<LogisticAvailableOrders />}/>
+            <Route path="orders" element={<LogisticOrders/>}/>
           </Route>
           <Route path="/about" element={<Home />} />
           <Route path="/" element={<Market />} >
@@ -43,6 +54,7 @@ function App() {
             <Route path="profile" element={<Profile/>}/>
             <Route path="settings" element={<Settings/>}/>
             <Route path="profile" element={<div>profile</div>}/>
+            <Route path="purchase" element={<Orders/>}/>
             <Route path="*" element={<div>Page Not Found</div>}/>
           </Route> 
           <Route path="/cart" element={<ProtectedRoute><Cart/></ProtectedRoute>}/>

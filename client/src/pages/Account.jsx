@@ -17,7 +17,7 @@ function Account() {
       <div className="w-full mt-0 md:mt-6 mx-auto ">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
-          <Sidebar menuItems={menu}/>
+          <Sidebar menuItems={menu} title={"My Account"}/>
 
           {/* Main Content */}
           <main className="flex-1 pr-6 pl-6 md:p-0">

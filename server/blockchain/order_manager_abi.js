@@ -2,12 +2,17 @@ export const ORDER_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
 				"internalType": "address",
-				"name": "provider",
+				"name": "logisticsAddress",
 				"type": "address"
 			}
 		],
-		"name": "addLogisticsProvider",
+		"name": "acceptOrder",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -49,7 +54,7 @@ export const ORDER_MANAGER_ABI = [
 			},
 			{
 				"internalType": "address",
-				"name": "providerAddress",
+				"name": "logisticsAddress",
 				"type": "address"
 			}
 		],
@@ -147,11 +152,6 @@ export const ORDER_MANAGER_ABI = [
 	},
 	{
 		"inputs": [],
-		"name": "NotLogistics",
-		"type": "error"
-	},
-	{
-		"inputs": [],
 		"name": "NotSeller",
 		"type": "error"
 	},
@@ -204,32 +204,6 @@ export const ORDER_MANAGER_ABI = [
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "provider",
-				"type": "address"
-			}
-		],
-		"name": "LogisticsProviderAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "provider",
-				"type": "address"
-			}
-		],
-		"name": "LogisticsProviderRemoved",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
 				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
@@ -249,6 +223,25 @@ export const ORDER_MANAGER_ABI = [
 			}
 		],
 		"name": "LogisticsUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "logistics",
+				"type": "address"
+			}
+		],
+		"name": "OrderAssignedToLogistics",
 		"type": "event"
 	},
 	{
@@ -317,6 +310,25 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "uint256",
 				"name": "orderId",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "logistics",
+				"type": "address"
+			}
+		],
+		"name": "OrderPickedUp",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
 			}
 		],
 		"name": "OrderRefunded",
@@ -357,12 +369,22 @@ export const ORDER_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
 				"internalType": "address",
-				"name": "provider",
+				"name": "logisticsAddress",
 				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
 			}
 		],
-		"name": "removeLogisticsProvider",
+		"name": "pickupOrder",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -443,6 +465,76 @@ export const ORDER_MANAGER_ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getAvailableOrders",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "productId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "sellerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "logisticsAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerUnit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "category",
+						"type": "string"
+					},
+					{
+						"internalType": "enum OrderManager.OrderStatus",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"internalType": "struct OrderManager.Order[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -472,6 +564,87 @@ export const ORDER_MANAGER_ABI = [
 					{
 						"internalType": "address",
 						"name": "sellerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "logisticsAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerUnit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "category",
+						"type": "string"
+					},
+					{
+						"internalType": "enum OrderManager.OrderStatus",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"internalType": "struct OrderManager.Order[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "logistics",
+				"type": "address"
+			}
+		],
+		"name": "getOrdersByLogistics",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "productId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "sellerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "logisticsAddress",
 						"type": "address"
 					},
 					{
@@ -546,6 +719,11 @@ export const ORDER_MANAGER_ABI = [
 						"type": "address"
 					},
 					{
+						"internalType": "address",
+						"name": "logisticsAddress",
+						"type": "address"
+					},
+					{
 						"internalType": "uint256",
 						"name": "quantity",
 						"type": "uint256"
@@ -579,25 +757,6 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "struct OrderManager.Order[]",
 				"name": "",
 				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "logisticsProviders",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -678,6 +837,11 @@ export const ORDER_MANAGER_ABI = [
 			{
 				"internalType": "address",
 				"name": "sellerAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "logisticsAddress",
 				"type": "address"
 			},
 			{

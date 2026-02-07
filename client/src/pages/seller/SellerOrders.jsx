@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getOrdersBySeller, confirmShipment} from "../../services/orderService";
-import {useUserContext} from "../../context/UserContext"
+import { getOrdersBySeller, confirmShipment } from "../../services/orderService";
+import { useUserContext } from "../../context/UserContext";
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const {user} = useUserContext();
+  const { user } = useUserContext();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -23,12 +23,11 @@ export default function SellerOrders() {
     fetchOrders();
   }, [user]);
 
-  const handleConfirmShipment = async(orderId) => {
+  const handleConfirmShipment = async (orderId) => {
     await confirmShipment(orderId);
     const data = await getOrdersBySeller(); 
     setOrders(data.orders || []);
-  }
-
+  };
 
   if (loading) return <div className="p-6">Loading orders...</div>;
   if (!orders.length) return <div className="p-6">No orders yet.</div>;
@@ -62,20 +61,28 @@ export default function SellerOrders() {
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${
                       order.status === 1
-                        ? "bg-yellow-100 text-yellow-800"
+                        ? "bg-yellow-100 text-yellow-800" // Paid
                         : order.status === 2
-                        ? "bg-blue-100 text-blue-800"
+                        ? "bg-blue-100 text-blue-800"     // Shipped
                         : order.status === 3
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-indigo-100 text-indigo-800" // PickedUp
+                        : order.status === 4
+                        ? "bg-green-100 text-green-800"   // Delivered
+                        : order.status === 5
+                        ? "bg-gray-200 text-gray-800"     // Completed
                         : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {order.status === 1
-                      ? "PENDING"
+                      ? "PAID"
                       : order.status === 2
                       ? "SHIPPED"
                       : order.status === 3
+                      ? "PICKED UP"
+                      : order.status === 4
                       ? "DELIVERED"
+                      : order.status === 5
+                      ? "COMPLETED"
                       : "UNKNOWN"}
                   </span>
                 </td>
@@ -88,14 +95,7 @@ export default function SellerOrders() {
                       Mark Shipped
                     </button>
                   )}
-                  {order.status === 2 && (
-                    <button
-                  
-                      className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-                    >
-                      Mark Delivered
-                    </button>
-                  )}
+                  {/* Seller cannot mark PickedUp or Delivered, that's logistics */}
                 </td>
               </tr>
             ))}
