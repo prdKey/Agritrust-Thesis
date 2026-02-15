@@ -1,9 +1,7 @@
 // AccountPage.jsx
 import Sidebar  from "../components/common/Sidebar.jsx";
 import { Outlet } from "react-router-dom";
-import { LayoutDashboard, Package, User ,Bell, Settings, LogOut, Menu, X } from "lucide-react";
-import { useEffect} from "react";
-import { useNavigate } from "react-router-dom";
+import { LayoutDashboard, Package, User ,Bell, Settings, MapPin } from "lucide-react";
 
 function Account() {
   const menu = [
@@ -11,11 +9,12 @@ function Account() {
     { name: "Profile", icon: User, path: "profile"},
     { name: "My Purchase", icon: Package, path: "purchase" },
     { name: "Notifications", icon:  Bell, path: "notifications"},
+    { name: "Address", icon: MapPin, path: "address"},
     { name: "Settings", icon: Settings, path: "settings"},
   ];
   return (
-      <div className="w-full mt-0 md:mt-6 mx-auto ">
-        <div className="flex flex-col md:flex-row gap-6">
+      <div className="w-full flex mt-0 md:mt-6 mx-auto ">
+        <div className=" w-full flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
           <Sidebar menuItems={menu} title={"My Account"}/>
 

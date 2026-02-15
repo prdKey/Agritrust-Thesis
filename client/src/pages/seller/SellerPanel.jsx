@@ -6,15 +6,15 @@ export default function SellerPanel() {
 
   const menu = [
     { name: "Dashboard", icon: LayoutDashboard, path:"dashboard"},
-    { name: "Products", icon: Package, path:"products" },
-    { name: "Orders", icon: ShoppingCart, path:"orders" },
+    { name: "Seller Products", icon: Package, path:"products" },
+    { name: "Orders Received", icon: ShoppingCart, path:"orders" },
     { name: "Analytics", icon: BarChart3, path:"analytics" },
     { name: "Settings", icon: Settings, path:"" },
   ];
 
   return (
-    <div className="w-full mt-0 md:mt-6 mx-auto ">
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className="w-full flex mt-0 md:mt-6 mx-auto ">
+      <div className="w-full flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
         <Sidebar menuItems={menu} title={"Seller Panel"}/>
 

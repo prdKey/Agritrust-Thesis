@@ -3,8 +3,7 @@
 export default function Settings() {
   return (
     <div className="h-full rounded-lg bg-gray-100 p-6">
-      <h2 className="text-2xl font-semibold text-gray-800">Settings</h2>
-
+      <h1 className="text-3xl font-bold mb-6 ">Settings</h1>
      
 
       {/* Logout Button */}

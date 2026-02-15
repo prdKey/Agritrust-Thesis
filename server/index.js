@@ -1,6 +1,8 @@
 import express from "express";
+import http from "http";
 import { sequelize } from "./models/index.js";
-import cors from "cors"
+import { initSocket } from "./config/socket.js";
+import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -12,8 +14,11 @@ import orderRoute from "./routes/Order.route.js"
 import cartRoute from "./routes/Cart.route.js"
 
 const app = express();
+const server = http.createServer(app);
 app.use(express.json());
 app.use(cors())
+
+
 
 app.use("/api/products", productRoute)
 app.use("/api/auth", authRoute)
@@ -21,9 +26,11 @@ app.use("/api/users", userRoute)
 app.use("/api/orders", orderRoute)
 app.use("/api/carts", cartRoute)
 
+initSocket(server);
+
 // Sync database & start server
-sequelize.sync({ alter: true }).then(() => {
-  app.listen(3001, () => {
+sequelize.sync().then(() => {
+  server.listen(3001, () => {
     console.log("Server running on port 3001");
   });
 });

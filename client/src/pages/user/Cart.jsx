@@ -4,22 +4,26 @@ import {
   getBuyerCarts,
   updateCartQuantity,
 } from "../../services/cartService.js";
+import { useUserContext } from "../../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
+
 
 export default function CartPage() {
 
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
+  const {user} = useUserContext();
 
   useEffect(() => {
-
+    if(!user) return;
     const fetchCartItems = async () => {
       const data = await getBuyerCarts();
       setCartItems(data.carts);
     };
 
     fetchCartItems();
-  }, []);
+  }, [user]);
 
   const increment = async (productId, quantity) => {
     setLoading(true);

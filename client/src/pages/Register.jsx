@@ -1,9 +1,20 @@
-import { useState } from "react";
-import ConnectButton from "../components/common/connectButton";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../context/UserContext.jsx";
+import { getNonce, verifySignature } from "../services/authService.js";
+import {
+  getPangasinanCities,
+  getBarangaysByCity,
+} from "../services/addressService.js";
 
 export default function Register() {
+  const { login } = useUserContext();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const [cities, setCities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -11,14 +22,104 @@ export default function Register() {
     phone: "",
     gender: "",
     dob: "",
+    houseNumber: "",
+    street: "",
+    barangay: "",
+    city: "",
+    postalCode: "",
   });
+
+  // Load cities
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const res = await getPangasinanCities();
+        setCities(res.data.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (err) {
+        console.error("Failed to load cities:", err);
+      }
+    };
+    loadCities();
+  }, []);
+
+  // Load barangays when city changes
+  useEffect(() => {
+    const loadBarangays = async () => {
+      if (!formData.city) return;
+      const selectedCity = cities.find((c) => c.name === formData.city);
+      if (!selectedCity) return;
+
+      try {
+        const res = await getBarangaysByCity(selectedCity.code);
+        setBarangays(res.data.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (err) {
+        console.error("Failed to load barangays:", err);
+      }
+    };
+    loadBarangays();
+  }, [formData.city, cities]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "city") {
+      setFormData((prev) => ({ ...prev, city: value, barangay: "" }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Check if all fields are filled
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return null;
+    }
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    return accounts[0];
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const walletAddress = await connectWallet();
+      if (!walletAddress) return;
+
+      const nonce = await getNonce(
+        walletAddress,
+        formData.firstName,
+        formData.lastName,
+        formData.email,
+        formData.phone,
+        formData.gender,
+        formData.dob,
+        formData.houseNumber,
+        formData.street,
+        formData.barangay,
+        formData.city,
+        formData.postalCode
+      );
+
+      const messageToSign = `Sign this message to authenticate: ${nonce}`;
+      const signature = await window.ethereum.request({
+        method: "personal_sign",
+        params: [messageToSign, walletAddress],
+      });
+
+      const user = await verifySignature(walletAddress, signature);
+      login(user);
+      alert("Registration successful!");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert("Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isFormComplete = Object.values(formData).every((v) => v.trim() !== "");
 
   return (
@@ -30,7 +131,7 @@ export default function Register() {
       />
 
       {/* Modal */}
-      <div className="relative z-60 bg-white shadow-xl rounded-lg w-full max-w-md max-h-[80vh] p-6">
+      <div className="relative z-50 bg-white shadow-xl rounded-lg w-full max-w-md max-h-[80vh] p-6">
         {/* Header */}
         <div className="flex flex-col justify-center items-center mb-4">
           <img
@@ -44,38 +145,75 @@ export default function Register() {
           </p>
         </div>
 
-        <form>
-          <div className="overflow-y-auto max-h-[40vh] p-2 space-y-3">
-            {/* Input fields */}
+        <form onSubmit={handleSubmit}>
+          <div className="overflow-y-auto max-h-[40vh] p-2 space-y-3 scroll">
             <InputField label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
             <InputField label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
             <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
-            <InputField label="Phone Number" name="phone" type="tel" value={formData.phone} onChange={handleChange} pattern="^09\d{9}$" />
-            <SelectField label="Gender" name="gender" value={formData.gender} onChange={handleChange} options={["Male", "Female", "Other"]} />
+            <InputField label="Phone Number" name="phone" type="tel" value={formData.phone} onChange={handleChange} pattern="^(09\d{9}|\+639\d{9})$"  />
+            <SelectField label="Gender" name="gender" value={formData.gender} onChange={handleChange} options={["Male","Female","Other"]} />
             <InputField label="Date of Birth" name="dob" type="date" value={formData.dob} onChange={handleChange} />
+
+            <InputField label="House/Unit Number" name="houseNumber" value={formData.houseNumber} onChange={handleChange} />
+            <InputField label="Street" name="street" value={formData.street} onChange={handleChange} />
+
+            {/* City */}
+            <div>
+              <label className="block font-medium mb-1">City / Municipality</label>
+              <select
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
+                required
+              >
+                <option value="">Select City / Municipality</option>
+                {cities.map((city) => (
+                  <option key={city.code} value={city.name}>{city.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Barangay */}
+            <div>
+              <label className="block font-medium mb-1">Barangay</label>
+              <select
+                name="barangay"
+                value={formData.barangay}
+                onChange={handleChange}
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
+                required
+                disabled={!formData.city}
+              >
+                <option value="">Select Barangay</option>
+                {barangays.map((b) => (
+                  <option key={b.code} value={b.name}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <InputField label="Postal Code" name="postalCode" value={formData.postalCode} onChange={handleChange} />
           </div>
 
-          {/* Connect Button */}
-          <div className="flex flex-col justify-center mt-5 space-y-2">
-            <ConnectButton
-              text="Register Wallet"
-              email={formData.email}
-              dob={formData.dob}
-              firstName={formData.firstName}
-              lastName={formData.lastName}
-              phone={formData.phone}
-              gender={formData.gender}
-              disabled={!isFormComplete} // Disable if empty
-            />
+          {/* Submit / Wallet Connect */}
+          <div className="flex flex-col justify-center mt-5">
+            <button
+              type="submit"
+              disabled={!isFormComplete || loading}
+              className={`w-full p-2 rounded-lg text-white transition ${
+                isFormComplete ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {loading ? "Processing..." : "Register"}
+            </button>
 
             <p
               onClick={() => navigate("/login")}
-              className="text-xs text-gray-400 font-light text-center hover:underline hover:text-green-600 cursor-pointer"
+              className="text-xs text-gray-400 font-light text-center m-2 hover:underline hover:text-green-600 cursor-pointer"
             >
               Already have an account? Connect your wallet
             </p>
-
-            <p className="text-xs text-gray-400 text-center">
+            <p className="text-xs text-gray-400 mt-2 text-center">
               By continuing, you agree to our Terms & Conditions
             </p>
           </div>
@@ -85,14 +223,13 @@ export default function Register() {
   );
 }
 
-// Reusable Input Field Component
+// Input Component
 function InputField({ label, name, type = "text", value, onChange, pattern }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-gray-700 font-medium mb-1">{label}</label>
+      <label className="block text-gray-700 font-medium mb-1">{label}</label>
       <input
         type={type}
-        id={name}
         name={name}
         value={value}
         onChange={onChange}
@@ -104,13 +241,12 @@ function InputField({ label, name, type = "text", value, onChange, pattern }) {
   );
 }
 
-// Reusable Select Field Component
+// Select Component
 function SelectField({ label, name, value, onChange, options }) {
   return (
     <div>
-      <label htmlFor={name} className="block text-gray-700 font-medium mb-1">{label}</label>
+      <label className="block text-gray-700 font-medium mb-1">{label}</label>
       <select
-        id={name}
         name={name}
         value={value}
         onChange={onChange}
