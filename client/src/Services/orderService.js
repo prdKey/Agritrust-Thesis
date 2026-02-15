@@ -111,3 +111,36 @@ export const acceptOrder = async (orderId) =>
     
     return res.data
 }
+
+export const updateOrderLocation = async (orderId, location) => 
+{
+    const res = await axios.put(`${API_URL}/orders/update-location`, {orderId, location},
+        {
+            headers: authHeader(),
+        }
+    ); 
+
+    return res.data
+}
+
+export const markOutForDelivery = async (orderId) =>
+{
+    const res = await axios.put(`${API_URL}/orders/mark-out-for-delivery`, {orderId},
+        {
+            headers: authHeader(),
+        }
+    );
+    
+    return res.data
+}
+
+export const getOrderById = async (orderId) =>
+{
+    const res = await axios.get(`${API_URL}/orders/${orderId}`,
+        {
+            headers: authHeader(),
+        }
+    );
+
+    return res.data
+}

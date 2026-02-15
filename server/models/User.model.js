@@ -7,82 +7,81 @@ const User = sequelize.define(
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      primaryKey: true
+      primaryKey: true,
     },
 
     firstName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
 
     lastName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
 
     middleName: {
       type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: ""
+      allowNull: true, // can be empty
+      defaultValue: "",
     },
 
-    phone: {
+    mobileNumber: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+    },
+
+    // Store full address as JSON
+    address: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {}, // can be empty object
+      // Example structure: { houseNumber, street, barangay, city, postalCode }
     },
 
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isEmail: true
-      }
+        isEmail: true,
+      },
     },
 
     gender: {
-      type: DataTypes.STRING,
-      allowNull: false
+      type: DataTypes.ENUM("Male", "Female", "Other"),
+      allowNull: false,
     },
 
-    dob: {                           // ✅ Added Date of Birth
+    dob: {
       type: DataTypes.DATEONLY,
-      allowNull: false
+      allowNull: false,
     },
 
     walletAddress: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-
-    nonce: {                        
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-
-    password: {
-      type: DataTypes.STRING,
-      allowNull: true
+      unique: "walletAddress_unique",
     },
 
     role: {
-      type: DataTypes.ENUM("USER","SELLER", "ADMIN", "LOGISTICS"),
+      type: DataTypes.ENUM("USER", "SELLER", "ADMIN", "LOGISTICS"),
       allowNull: false,
-      defaultValue: "USER"
+      defaultValue: "USER",
     },
 
     isVerified: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
     },
 
     status: {
       type: DataTypes.ENUM("ACTIVE", "SUSPENDED"),
-      defaultValue: "ACTIVE"
+      defaultValue: "ACTIVE",
     },
   },
   {
     tableName: "users",
-    timestamps: true
+    timestamps: true,
   }
 );
 

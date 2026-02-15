@@ -1,26 +1,37 @@
 import {contract, productManagerContract, orderManagerContract} from "../blockchain/contract.js"
 import { User } from "../models/index.js"   
+import { parseUnits, formatUnits } from "ethers";
 
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    
-    const data = await productManagerContract.getAllActiveProducts()
+    // Fetch all products from the smart contract
+    const data = await productManagerContract.getAllActiveProducts();
 
+    // Fetch all users from your database
+    const users = await User.findAll();
 
-    const products = data.map((p) => ({
-      id: Number(p.id),         // BigInt -> string
-      sellerAddress: p.sellerAddress,
-      imageCID: p.imageCID,
-      name: p.name,
-      category: p.category,
-      pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
-      stock: Number(p.stock),      // BigInt -> string
-      active: p.active
-    }))
-    console.log({products})
+    // Map products with the owner's address
+    const products = data.map((p) => {
+      // Find the owner by wallet address
+      const owner = users.find(
+        u => u.walletAddress.toLowerCase() === p.sellerAddress.toLowerCase()
+      );
+      return {
+        id: Number(p.id),                 // BigInt -> number
+        sellerAddress: p.sellerAddress,   // blockchain wallet
+        imageCID: p.imageCID,
+        name: p.name,
+        category: p.category,
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)), // BigInt -> number
+        stock: Number(p.stock),                // BigInt -> number
+        active: p.active,
+        ownerAddress: owner ? owner.address : "Unknown" // physical address
+      };
+    });
     res.json({ products });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -37,7 +48,7 @@ export const getProductsBySeller = async (req, res) => {
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));
@@ -61,12 +72,13 @@ export const getProductById = async (req, res) => {
       name: productRaw.name,
       imageCID: productRaw.imageCID,
       category: productRaw.category,
-      pricePerUnit: Number(productRaw.pricePerUnit),
+      pricePerUnit: Number(formatUnits(productRaw.pricePerUnit, 18)),
       stock: Number(productRaw.stock),
       active: productRaw.active
     };
     res.status(201).json({product});
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 }
@@ -80,7 +92,7 @@ export const createProduct = async (req, res) => {
       name,
       imageCID,
       category,
-      pricePerUnit,
+      parseUnits(pricePerUnit.toString(), 18), // Convert to Wei
       stock,
       walletAddress
     )
@@ -94,7 +106,7 @@ export const createProduct = async (req, res) => {
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string (convert back from Wei)
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));
@@ -102,6 +114,7 @@ export const createProduct = async (req, res) => {
     res.json({products});
   }
   catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 }
@@ -115,7 +128,7 @@ export const updateProduct = async (req, res) => {
       name,
       imageCID,
       category,
-      pricePerUnit,
+      parseUnits(pricePerUnit.toString(), 18),
       stock,
       walletAddress
     )
@@ -128,7 +141,7 @@ export const updateProduct = async (req, res) => {
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useLocation} from "react-router-dom";
-import { X, Menu } from "lucide-react";
+import { X, Menu, LogOut} from "lucide-react";
 import { useEffect } from "react";
+import { useUserContext } from "@/context/UserContext";
 
 export default function Sidebar({ menuItems, title}) {
+  const {logout} = useUserContext(); 
   const location = useLocation();
   const locationTrim = location.pathname.split("/")
   const path = locationTrim[2] || "dashboard";
@@ -30,7 +32,7 @@ export default function Sidebar({ menuItems, title}) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-15 left-0 z-1 h-full rounded-lg bg-white shadow-lg transition-transform duration-300 p-4
+        className={`fixed top-15 left-0 z-1 h-165 rounded-lg bg-white shadow-lg transition-transform duration-300 p-4
           ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:w-64 w-64`}
       >
         {/* Header */}
@@ -44,26 +46,29 @@ export default function Sidebar({ menuItems, title}) {
           </button>
         </div>
 
-        {/* Menu Items */}
-        <div className="flex flex-col mt-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {
-                setActive(item.path);
-                navigate(item.path);
-                setOpen(false); // Close sidebar on mobile after navigation
-              }}
-              className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer w-full text-left transition-colors duration-200
-                ${active === item.path
-                  ? "bg-green-500 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
-            </button>
-          ))}
+        <div className="flex flex-col justify-between h-150">
+          {/* Menu Items */}
+          <div className="flex flex-col mt-4">
+            {menuItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => {
+                  setActive(item.path);
+                  navigate(item.path);
+                  setOpen(false); // Close sidebar on mobile after navigation
+                }}
+                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer w-full text-left transition-colors duration-200
+                  ${active === item.path
+                    ? "bg-green-500 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                  }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.name}</span>
+              </button>
+            ))}
+          </div>
+          <button onClick={logout} className="cursor-pointer mt-auto p-2 bg-red-200 font-bold flex items-center gap-2 text-red-500 rounded-lg text-left"><LogOut/>Logout</button>
         </div>
       </aside>
 

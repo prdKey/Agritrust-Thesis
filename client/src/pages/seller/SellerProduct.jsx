@@ -8,6 +8,7 @@ import Notification from "../../components/common/Notification.jsx";
 export default function SellerProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setloading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const {user} = useUserContext();
 
     useEffect(() => {
@@ -51,37 +52,44 @@ export default function SellerProducts() {
   };
 
   const handleAdd = async () => {
-    if (!form.name || !form.pricePerUnit || !form.stock || !form.category) return;
-    setloading(true);
+    if (!form.name || !form.pricePerUnit || !form.stock || !form.category || !form.imageCID) return;
+    setSaving(true);
+    setloading(true)
+    const cid = await uploadImageToPinata(form.imageCID)
+  
     const data = await listProduct({
         ...form,
         pricePerUnit: Number(form.pricePerUnit),
         stock: Number(form.stock),
-        
+        imageCID: cid
     })
     setProducts(data.products)
     addNotification(`Product "${form.name}" added successfully!`, "success");
     resetForm();
-    setloading(false);
+    setSaving(false);
+    setloading(false)
   };
 
   const handleEdit = (product) => {
     setIsEditing(true);
-    setForm(product);
+    setForm({...product, imageCID: "" }); // Reset imageCID for new upload
   };
 
   const handleUpdate = async () => {
-    if (!form.name || !form.pricePerUnit || !form.stock || !form.category) return;
+    if (!form.name || !form.pricePerUnit || !form.stock || !form.category || !form.imageCID) return;
     setloading(true);
+    setSaving(true)
+    const cid = await uploadImageToPinata(form.imageCID)
     const data = await updateProduct({
         ...form,
         pricePerUnit: Number(form.pricePerUnit),
         stock: Number(form.stock),
-        
+        imageCID: cid
     })
     setProducts(data.products);
     setloading(false)
     setIsEditing(false);
+    setSaving(false);
     resetForm();
   };
 
@@ -97,19 +105,11 @@ export default function SellerProducts() {
     setForm({ id: null, name: "", pricePerUnit: "", stock: "", category: "", imageCID: "" });
   };
 
-  const handleUpload = async (e) => {
+ 
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    try {
-      setloading(true)
-      const cid = await uploadImageToPinata(file)
-      console.log("CID: " + cid)
-      setForm({ ...form, [e.target.name]: cid });
-    } catch (err) {
-      console.error("Error uploading file:", err);
-    } finally{
-      setloading(false)
-    }
+    setForm((prev) => ({ ...prev, imageCID: file }));
   };
 
   // Filtered products by search ID
@@ -175,12 +175,12 @@ export default function SellerProducts() {
             name="imageCID"
             type="file"
             accept="image/*"
-            onChange={handleUpload}
+            onChange={handleImageChange}
             className="flex-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400 cursor-pointer"
           />
           {form.imageCID && (
             <img
-              src={`https://bronze-magnificent-constrictor-556.mypinata.cloud/ipfs/${form.imageCID}`}
+              src={form.imageCID ? URL.createObjectURL(form.imageCID) : "https://upload.wikimedia.org/wikipedia/commons/7/7c/User_icon_2.svg"}
               alt="Preview"
               className="mt-2 h-32 rounded object-cover"
             />
@@ -193,7 +193,7 @@ export default function SellerProducts() {
             disabled={loading}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 md:col-span-2 cursor-pointer"
           >
-            Add Product
+            {saving ? "Saving product..." : "Add Product"}
           </button>
         ) : (
           <>
@@ -202,7 +202,7 @@ export default function SellerProducts() {
               disabled={loading}
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 md:col-span-2 cursor-pointer"
             >
-              Update Product
+              {saving ? "Updating product..." : "Update Product"}
             </button>
 
             <button
@@ -210,6 +210,7 @@ export default function SellerProducts() {
                 setIsEditing(false);
                 resetForm();
               }}
+              disabled={loading}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-gray-500 md:col-span-2 cursor-pointer"
             >
               Cancel

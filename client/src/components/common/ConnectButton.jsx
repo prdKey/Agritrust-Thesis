@@ -2,8 +2,8 @@ import React from 'react'
 import { getNonce, verifySignature} from "../../services/authService.js";
 import { useUserContext } from '../../context/UserContext.jsx';
 
-export default function ConnectButton({text,firstName, lastName, email, mobileNumber, gender, dob, disabled}) {
-    const { setUser } = useUserContext();
+export default function ConnectButton({text,firstName, lastName, email, mobileNumber, gender, dob, houseNumber, street, barangay, city, postalCode}) {
+    const { login } = useUserContext();
 
     const connectWallet = async() => {
         if (!window.ethereum) return alert("Please install MetaMask!");
@@ -11,10 +11,10 @@ export default function ConnectButton({text,firstName, lastName, email, mobileNu
         return accounts[0];
     }
 
-    const login = async () => {
+    const handleLogin = async () => {
     try {
       const walletAddress = await connectWallet();
-      const nonce = await getNonce(walletAddress, firstName, lastName, email, mobileNumber, gender, dob);
+      const nonce = await getNonce(walletAddress, firstName, lastName, email, mobileNumber, gender, dob, houseNumber, street, barangay, city, postalCode);
       const messageToSign = `Sign this message to authenticate: ${nonce}`;
 
       const signature = await window.ethereum.request({
@@ -23,7 +23,7 @@ export default function ConnectButton({text,firstName, lastName, email, mobileNu
       });
 
       const user = await verifySignature(walletAddress, signature);
-      setUser(user)
+      login(user)
 
 
       alert("Login successful!");
@@ -34,7 +34,7 @@ export default function ConnectButton({text,firstName, lastName, email, mobileNu
   };
 
   return (
-    <button  onClick={login} className="bg-green-600 rounded-lg text-white p-4 cursor-pointer hover:bg-green-500">
+    <button  onClick={handleLogin} className="bg-green-600 rounded-lg text-white p-4 cursor-pointer hover:bg-green-500">
         {text}
     </button>
   )

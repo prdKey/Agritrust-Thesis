@@ -48,6 +48,143 @@ export const ORDER_MANAGER_ABI = [
 				"type": "uint256"
 			},
 			{
+				"internalType": "address",
+				"name": "buyerAddress",
+				"type": "address"
+			}
+		],
+		"name": "cancelOrderByBuyer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_agtToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_productManager",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "CannotCancelOrder",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InactiveProduct",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InsufficientStock",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidOrderState",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidQuantity",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotAuthorized",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotBuyer",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotDisputed",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotSeller",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "OwnableInvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "OwnableUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "PaymentFailed",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newRate",
+				"type": "uint256"
+			}
+		],
+		"name": "CancellationFeeRateUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "sellerAddress",
+				"type": "address"
+			}
+		],
+		"name": "cancelOrderBySeller",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
 				"internalType": "string",
 				"name": "location",
 				"type": "string"
@@ -100,60 +237,85 @@ export const ORDER_MANAGER_ABI = [
 		"type": "function"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_agtToken",
-				"type": "address"
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "platformFee",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "logisticsFee",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "sellerAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "FeesDistributed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			}
+		],
+		"name": "LocationUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newFee",
+				"type": "uint256"
+			}
+		],
+		"name": "LogisticsFeeUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
 			},
 			{
 				"internalType": "address",
-				"name": "_productManager",
+				"name": "logisticsAddress",
 				"type": "address"
 			}
 		],
+		"name": "markOutForDelivery",
+		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "InactiveProduct",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "InsufficientStock",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "InvalidOrderState",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "InvalidQuantity",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "NotAuthorized",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "NotBuyer",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "NotDisputed",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "NotSeller",
-		"type": "error"
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -174,58 +336,6 @@ export const ORDER_MANAGER_ABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "OwnableInvalidOwner",
-		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "OwnableUnauthorizedAccount",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "PaymentFailed",
-		"type": "error"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "orderId",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "status",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "location",
-				"type": "string"
-			}
-		],
-		"name": "LogisticsUpdated",
-		"type": "event"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -242,6 +352,56 @@ export const ORDER_MANAGER_ABI = [
 			}
 		],
 		"name": "OrderAssignedToLogistics",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "refundAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cancellationFee",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "OrderCancelledByBuyer",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "OrderCancelledBySeller",
 		"type": "event"
 	},
 	{
@@ -271,6 +431,18 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "address",
 				"name": "buyer",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "productPrice",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalPrice",
+				"type": "uint256"
 			}
 		],
 		"name": "OrderCreated",
@@ -283,6 +455,18 @@ export const ORDER_MANAGER_ABI = [
 				"indexed": true,
 				"internalType": "uint256",
 				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
 				"type": "uint256"
 			}
 		],
@@ -313,9 +497,40 @@ export const ORDER_MANAGER_ABI = [
 			},
 			{
 				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "OrderOutForDelivery",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
 				"internalType": "address",
 				"name": "logistics",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
 			}
 		],
 		"name": "OrderPickedUp",
@@ -390,6 +605,19 @@ export const ORDER_MANAGER_ABI = [
 		"type": "function"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newRate",
+				"type": "uint256"
+			}
+		],
+		"name": "PlatformFeeRateUpdated",
+		"type": "event"
+	},
+	{
 		"inputs": [],
 		"name": "renounceOwnership",
 		"outputs": [],
@@ -417,12 +645,74 @@ export const ORDER_MANAGER_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "_cancellationFeeRate",
+				"type": "uint256"
+			}
+		],
+		"name": "setCancellationFeeRate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_fixedLogisticsFee",
+				"type": "uint256"
+			}
+		],
+		"name": "setFixedLogisticsFee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_platformFeeRate",
+				"type": "uint256"
+			}
+		],
+		"name": "setPlatformFeeRate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "newOwner",
 				"type": "address"
 			}
 		],
 		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "logisticsAddress",
+				"type": "address"
+			}
+		],
+		"name": "updateLocation",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -454,6 +744,122 @@ export const ORDER_MANAGER_ABI = [
 			}
 		],
 		"name": "buyerOrders",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "productPrice",
+				"type": "uint256"
+			}
+		],
+		"name": "calculateTotalPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalPrice",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "platformFee",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "logisticsFee",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "canBuyerCancelOrder",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "canCancel",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "cancellationFeeRate",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "canSellerCancelOrder",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "canCancel",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "FEE_DENOMINATOR",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "fixedLogisticsFee",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -507,6 +913,11 @@ export const ORDER_MANAGER_ABI = [
 					},
 					{
 						"internalType": "uint256",
+						"name": "productPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
 						"name": "pricePerUnit",
 						"type": "uint256"
 					},
@@ -524,11 +935,202 @@ export const ORDER_MANAGER_ABI = [
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "imageCID",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "location",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "confirmAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pickedUpAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outForDeliveryAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deliveredAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "completedAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cancelledAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "platformFee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "logisticsFee",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct OrderManager.Order[]",
 				"name": "",
 				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "orderId",
+				"type": "uint256"
+			}
+		],
+		"name": "getOrderById",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "productId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "sellerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "logisticsAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "productPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pricePerUnit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "category",
+						"type": "string"
+					},
+					{
+						"internalType": "enum OrderManager.OrderStatus",
+						"name": "status",
+						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "imageCID",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "location",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "confirmAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pickedUpAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outForDeliveryAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deliveredAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "completedAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cancelledAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "platformFee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "logisticsFee",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct OrderManager.Order",
+				"name": "",
+				"type": "tuple"
 			}
 		],
 		"stateMutability": "view",
@@ -583,6 +1185,11 @@ export const ORDER_MANAGER_ABI = [
 					},
 					{
 						"internalType": "uint256",
+						"name": "productPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
 						"name": "pricePerUnit",
 						"type": "uint256"
 					},
@@ -600,6 +1207,61 @@ export const ORDER_MANAGER_ABI = [
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "imageCID",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "location",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "confirmAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pickedUpAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outForDeliveryAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deliveredAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "completedAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cancelledAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "platformFee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "logisticsFee",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct OrderManager.Order[]",
@@ -659,6 +1321,11 @@ export const ORDER_MANAGER_ABI = [
 					},
 					{
 						"internalType": "uint256",
+						"name": "productPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
 						"name": "pricePerUnit",
 						"type": "uint256"
 					},
@@ -676,6 +1343,61 @@ export const ORDER_MANAGER_ABI = [
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "imageCID",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "location",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "confirmAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pickedUpAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outForDeliveryAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deliveredAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "completedAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cancelledAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "platformFee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "logisticsFee",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct OrderManager.Order[]",
@@ -735,6 +1457,11 @@ export const ORDER_MANAGER_ABI = [
 					},
 					{
 						"internalType": "uint256",
+						"name": "productPrice",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
 						"name": "pricePerUnit",
 						"type": "uint256"
 					},
@@ -752,11 +1479,105 @@ export const ORDER_MANAGER_ABI = [
 						"internalType": "enum OrderManager.OrderStatus",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "imageCID",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "location",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "confirmAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "pickedUpAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "outForDeliveryAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deliveredAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "completedAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cancelledAt",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "platformFee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "logisticsFee",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct OrderManager.Order[]",
 				"name": "",
 				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPlatformEarnings",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalCancellationFees",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalLogisticsFees",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -770,40 +1591,6 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "orderLogistics",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "status",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "location",
-				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -856,6 +1643,11 @@ export const ORDER_MANAGER_ABI = [
 			},
 			{
 				"internalType": "uint256",
+				"name": "productPrice",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "pricePerUnit",
 				"type": "uint256"
 			},
@@ -873,6 +1665,61 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "enum OrderManager.OrderStatus",
 				"name": "status",
 				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "imageCID",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "confirmAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pickedUpAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "outForDeliveryAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "deliveredAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "completedAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cancelledAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "platformFee",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "logisticsFee",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -886,6 +1733,19 @@ export const ORDER_MANAGER_ABI = [
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "platformFeeRate",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -918,6 +1778,45 @@ export const ORDER_MANAGER_ABI = [
 			}
 		],
 		"name": "sellerOrders",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalCancellationFees",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalLogisticsFees",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalPlatformFees",
 		"outputs": [
 			{
 				"internalType": "uint256",
