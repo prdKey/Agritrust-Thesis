@@ -1,5 +1,16 @@
 import User from "../models/User.model.js";
-import { contract } from "../blockchain/contract.js";
+import { tokenContract } from "../blockchain/contract.js";
+import { formatUnits } from "ethers";
+
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 export const updateProfile = async (req, res) => {
   try {
@@ -38,3 +49,14 @@ export const getSellerStats = async (req, res) =>{
     return res.status(400).json({ message: "Missing walletAddress or Invalid walletAddress" });
   }
 }
+
+export const getBalance = async (req, res) => {
+  try {
+    const walletAddress = req.user.walletAddress;
+    const balance = await tokenContract.balanceOf(walletAddress);
+    res.json({ balance: Number(formatUnits(balance, 18)) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
