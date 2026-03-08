@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../../services/userService";
+import { getAllUsers } from "../../services/userService.js";
 import { User, Mail, Phone, MapPin, Wallet, Calendar, ChevronDown } from "lucide-react";
 
 export default function Users() {

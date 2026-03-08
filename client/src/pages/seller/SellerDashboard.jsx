@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useUserContext } from "../../context/UserContext";
-import { getProductsByUser } from "../../services/productService";
-import { getOrdersBySeller } from "../../services/orderService";
+import { useUserContext } from "../../context/UserContext.jsx";
+import { getProductsByUser } from "../../services/productService.js";
+import { getOrdersBySeller } from "../../services/orderService.js";
 import { 
   Package, 
   ShoppingBag, 

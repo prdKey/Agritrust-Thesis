@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getOrdersByBuyer, getOrdersBySeller, resolveDispute, getDisputedOrders} from "../../services/orderService";
-import { useUserContext } from "../../context/UserContext";
-import axios from "axios";
+import {resolveDispute, getDisputedOrders} from "../../services/orderService.js";
+import { useUserContext } from "../../context/UserContext.jsx";
+
 import {
   AlertTriangle, CheckCircle, XCircle, RefreshCw,
   Loader2, ChevronDown, ChevronUp, Scale, User, Package
