@@ -10,7 +10,7 @@ export default function SellerPanel() {
     { name: "Available Orders", icon: Package, path:"available-orders" },
     { name: "Orders To Deliver", icon: ShoppingCart, path:"orders" },
     { name: "Analytics", icon: BarChart3, path:"analytics" },
-    { name: "Settings", icon: Settings, path:"" },
+    { name: "Settings", icon: Settings, path:"settings" },
   ];
 
   return (
@@ -26,9 +26,6 @@ export default function SellerPanel() {
         </main>
       </div>
     </div>
-
-    
-
   );
 }
 

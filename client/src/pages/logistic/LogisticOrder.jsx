@@ -1,395 +1,456 @@
 import React, { useEffect, useState } from "react";
 import { useUserContext } from "../../context/UserContext";
-import { getOrdersByLogistics, pickupOrder, confirmDelivery, markOutForDelivery } from "../../services/orderService.js";
+import {
+  getOrdersByLogistics, getAvailableOrders, acceptOrder,
+  pickupOrder, confirmDelivery, markOutForDelivery
+} from "../../services/orderService.js";
+import {
+  Package, Truck, CheckCircle, MapPin,
+  ChevronDown, ChevronUp, Loader2, RefreshCw,
+  Navigation, Star
+} from "lucide-react";
 
-const STATUS_TABS = [
+const MY_DELIVERIES_TABS = [
   { id: "all", label: "All" },
-  { id: 2, label: "Ready for Pickup" },
-  { id: 3, label: "Picked Up" },
-  { id: 4, label: "Out for Delivery" },
-  { id: 5, label: "Delivered" },
-  { id: 6, label: "Completed" },
+  { id: 2,     label: "Ready for Pickup" },
+  { id: 3,     label: "Picked Up" },
+  { id: 4,     label: "Out for Delivery" },
+  { id: 5,     label: "Delivered" },
+  { id: 6,     label: "Completed" },
 ];
+
+const STATUS_CONFIG = {
+  2: { label: "READY FOR PICKUP",  color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  3: { label: "PICKED UP",         color: "bg-indigo-100 text-indigo-800 border-indigo-200" },
+  4: { label: "OUT FOR DELIVERY",  color: "bg-purple-100 text-purple-800 border-purple-200" },
+  5: { label: "DELIVERED",         color: "bg-teal-100 text-teal-800 border-teal-200" },
+  6: { label: "COMPLETED",         color: "bg-green-100 text-green-800 border-green-200" },
+};
+
+const fmtTime = (ts) => (!ts || ts === 0) ? null : new Date(ts * 1000).toLocaleString();
+const fmtAddr = (loc) => {
+  if (!loc) return "N/A";
+  if (typeof loc === "string") return loc;
+  return `#${loc.houseNumber}, ${loc.street}, ${loc.barangay}, ${loc.city}`;
+};
 
 export default function LogisticOrders() {
   const { user } = useUserContext();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
-  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) return;
-      try {
-        const res = await getOrdersByLogistics();
-        setOrders(res.orders || []);
-      } catch (err) {
-        console.error("Failed to fetch logistics orders:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, [user]);
+  // Main tab: "my-orders" | "available"
+  const [mainTab, setMainTab]             = useState("my-orders");
+  const [myOrders, setMyOrders]           = useState([]);
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [expandedId, setExpandedId]       = useState(null);
+  const [statusTab, setStatusTab]         = useState("all");
+  const [modal, setModal]                 = useState(null); // { type, order }
+
+  const fetchAll = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const [myRes, availRes] = await Promise.all([
+        getOrdersByLogistics(),
+        getAvailableOrders(),
+      ]);
+      setMyOrders(myRes.orders || []);
+      setAvailableOrders(availRes.orders || []);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchAll(); }, [user]);
+
+  // ── Actions ────────────────────────────────────────────────────────────────
+  const handleAcceptOrder = async (orderId) => {
+    setModal(null); setActionLoading(orderId);
+    try {
+      await acceptOrder(orderId);
+      await fetchAll();
+      setMainTab("my-orders"); // switch to My Deliveries after accepting
+    } catch (e) { alert(e.response?.data?.error || "Failed to accept order"); }
+    finally { setActionLoading(null); }
+  };
 
   const handlePickup = async (orderId) => {
-    setLoading(true);
-    await pickupOrder(orderId, "Picked up from seller");
-    const res = await getOrdersByLogistics();
-    setOrders(res.orders || []);
-    setLoading(false);
+    setModal(null); setActionLoading(orderId);
+    try {
+      await pickupOrder(orderId, "Picked up from seller");
+      await fetchAll();
+    } catch (e) { alert(e.response?.data?.error || "Failed to confirm pickup"); }
+    finally { setActionLoading(null); }
   };
 
   const handleMarkOutForDelivery = async (orderId) => {
-    setLoading(true);
-    await markOutForDelivery(orderId);
-    const res = await getOrdersByLogistics();
-    setOrders(res.orders || []);
-    setLoading(false);
+    setModal(null); setActionLoading(orderId);
+    try {
+      await markOutForDelivery(orderId);
+      await fetchAll();
+    } catch (e) { alert(e.response?.data?.error || "Failed to mark out for delivery"); }
+    finally { setActionLoading(null); }
   };
 
   const handleDeliver = async (orderId) => {
-    setLoading(true);
-    await confirmDelivery(orderId, "Delivered to buyer");
-    const res = await getOrdersByLogistics();
-    setOrders(res.orders || []);
-    setLoading(false);
+    setModal(null); setActionLoading(orderId);
+    try {
+      await confirmDelivery(orderId, "Delivered to buyer");
+      await fetchAll();
+    } catch (e) { alert(e.response?.data?.error || "Failed to confirm delivery"); }
+    finally { setActionLoading(null); }
   };
 
+  // ── Helpers ────────────────────────────────────────────────────────────────
   const getStatusBadge = (status) => {
-    const statusConfig = {
-      2: { label: "READY FOR PICKUP", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-      3: { label: "PICKED UP", color: "bg-indigo-100 text-indigo-800 border-indigo-200" },
-      4: { label: "OUT FOR DELIVERY", color: "bg-purple-100 text-purple-800 border-purple-200" },
-      5: { label: "DELIVERED", color: "bg-teal-100 text-teal-800 border-teal-200" },
-      6: { label: "COMPLETED", color: "bg-green-100 text-green-800 border-green-200" },
+    const cfg = STATUS_CONFIG[status] || { label: "UNKNOWN", color: "bg-gray-100 text-gray-800 border-gray-200" };
+    return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>{cfg.label}</span>;
+  };
+
+  const filteredMyOrders = (statusTab === "all" ? myOrders : myOrders.filter(o => o.status === statusTab))
+    .slice().sort((a, b) => b.id - a.id);
+
+  // ── Confirm Modal ──────────────────────────────────────────────────────────
+  const ConfirmModal = () => {
+    if (!modal) return null;
+    const { type, order } = modal;
+    const configs = {
+      accept: {
+        icon: <Star className="w-12 h-12 text-green-500 mx-auto mb-3" />,
+        title: "Accept Delivery Job",
+        body: `Accept Order #${order.id} (${order.name})? You'll earn ${parseFloat(order.logisticsFee).toFixed(2)} AGT upon delivery. Pick up from: ${fmtAddr(order.sellerLocation)}.`,
+        confirmLabel: "Accept Job",
+        confirmClass: "bg-green-600 hover:bg-green-700",
+        onConfirm: () => handleAcceptOrder(order.id),
+      },
+      pickup: {
+        icon: <Package className="w-12 h-12 text-blue-500 mx-auto mb-3" />,
+        title: "Confirm Pickup",
+        body: `Confirm you've picked up Order #${order.id} from the seller?`,
+        confirmLabel: "Yes, Picked Up",
+        confirmClass: "bg-blue-600 hover:bg-blue-700",
+        onConfirm: () => handlePickup(order.id),
+      },
+      outForDelivery: {
+        icon: <Truck className="w-12 h-12 text-purple-500 mx-auto mb-3" />,
+        title: "Mark Out for Delivery",
+        body: `Mark Order #${order.id} as out for delivery? Deliver to: ${fmtAddr(order.buyerLocation)}.`,
+        confirmLabel: "Yes, Out for Delivery",
+        confirmClass: "bg-purple-600 hover:bg-purple-700",
+        onConfirm: () => handleMarkOutForDelivery(order.id),
+      },
+      deliver: {
+        icon: <CheckCircle className="w-12 h-12 text-teal-500 mx-auto mb-3" />,
+        title: "Confirm Delivery",
+        body: `Confirm you've delivered Order #${order.id} to the buyer? You'll receive ${parseFloat(order.logisticsFee).toFixed(2)} AGT once the buyer confirms receipt.`,
+        confirmLabel: "Yes, Delivered",
+        confirmClass: "bg-teal-600 hover:bg-teal-700",
+        onConfirm: () => handleDeliver(order.id),
+      },
     };
-
-    const config = statusConfig[status] || { label: "UNKNOWN", color: "bg-gray-100 text-gray-800 border-gray-200" };
-    
+    const cfg = configs[type];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${config.color}`}>
-        {config.label}
-      </span>
-    );
-  };
-
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp || timestamp === 0) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString();
-  };
-
-  const formatAddress = (location) => {
-    if (!location) return "N/A";
-    return `#${location.houseNumber}, ${location.street}, ${location.barangay}, ${location.city}`;
-  };
-
-  const toggleExpand = (orderId) => {
-    setExpandedOrderId(expandedOrderId === orderId ? null : orderId);
-  };
-
-  const filteredOrders = (activeTab === "all"
-    ? orders
-    : orders.filter((o) => o.status === activeTab))
-    .slice()
-    .sort((a, b) => b.id - a.id);
-
-  if (loading) {
-    return (
-      <div className="p-6 bg-gray-100 min-h-screen">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading orders...</div>
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+          {cfg.icon}
+          <h3 className="text-lg font-bold text-gray-900 text-center mb-2">{cfg.title}</h3>
+          <p className="text-sm text-gray-600 text-center mb-6">{cfg.body}</p>
+          <div className="flex gap-3">
+            <button onClick={() => setModal(null)} className="flex-1 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 text-sm">Back</button>
+            <button onClick={cfg.onConfirm} className={`flex-1 py-2.5 text-white rounded-xl font-semibold text-sm ${cfg.confirmClass}`}>{cfg.confirmLabel}</button>
+          </div>
         </div>
       </div>
     );
-  }
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
+    </div>
+  );
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Deliveries</h1>
-        <p className="text-gray-600 mt-2">Manage your delivery orders</p>
-      </div>
+      <ConfirmModal />
 
-      {/* Tabs */}
-      <div className="flex space-x-2 overflow-x-auto mb-6">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-              activeTab === tab.id
-                ? "bg-green-600 text-white shadow-md"
-                : "bg-white text-gray-700 hover:bg-green-50 border border-gray-200"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {filteredOrders.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-          <p className="text-gray-500">
-            {activeTab === "all" 
-              ? "You don't have any delivery orders yet" 
-              : `No orders with status "${STATUS_TABS.find(s => s.id === activeTab)?.label}"`}
-          </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Deliveries</h1>
+          <p className="text-gray-600 mt-1">Accept and manage your delivery jobs</p>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200"
-            >
-              {/* Landscape Layout */}
-              <div className="flex flex-col lg:flex-row">
-                {/* Left Panel */}
-                <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-5 lg:w-72 border-b lg:border-b-0 lg:border-r border-gray-200">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Order ID</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">#{order.id}</p>
-                    </div>
-                    
-                    <div>
-                      {getStatusBadge(order.status)}
-                    </div>
+        <button onClick={fetchAll} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <RefreshCw className="w-4 h-4" /> Refresh
+        </button>
+      </div>
 
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Product</p>
-                      <p className="text-sm font-bold text-gray-900 leading-tight">{order.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">{order.category}</p>
-                    </div>
+      {/* Main Tab: Available vs My Deliveries */}
+      <div className="flex gap-3 mb-6">
+        <button onClick={() => setMainTab("available")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${mainTab === "available" ? "bg-green-600 text-white shadow-md" : "bg-white text-gray-700 border border-gray-200 hover:bg-green-50"}`}>
+          <Star className="w-4 h-4" />
+          Available Jobs
+          {availableOrders.length > 0 && (
+            <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${mainTab === "available" ? "bg-white text-green-700" : "bg-green-600 text-white"}`}>
+              {availableOrders.length}
+            </span>
+          )}
+        </button>
+        <button onClick={() => setMainTab("my-orders")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${mainTab === "my-orders" ? "bg-green-600 text-white shadow-md" : "bg-white text-gray-700 border border-gray-200 hover:bg-green-50"}`}>
+          <Truck className="w-4 h-4" />
+          My Deliveries
+          {myOrders.length > 0 && (
+            <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${mainTab === "my-orders" ? "bg-white text-green-700" : "bg-gray-200 text-gray-700"}`}>
+              {myOrders.length}
+            </span>
+          )}
+        </button>
+      </div>
 
-                    <div className="pt-3 border-t border-gray-200">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Quantity</p>
-                          <p className="text-lg font-bold text-gray-900">{order.quantity}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">You Earn</p>
-                          <p className="text-lg font-bold text-green-600">{order.logisticsFee} AGT</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Panel */}
-                <div className="flex-1 p-5">
-                  <div className="space-y-4">
-                    {/* Seller and Buyer Info */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {/* Seller */}
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pickup From (Seller)</p>
-                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-gray-900">{order.sellerName || "Unknown"}</span>
-                            {order.sellerMobile && (
-                              <a href={`tel:${order.sellerMobile}`} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                                📞 {order.sellerMobile}
-                              </a>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {formatAddress(order.sellerLocation)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Buyer */}
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Deliver To (Buyer)</p>
-                        <div className="bg-green-50 rounded-lg p-3 border border-green-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-gray-900">{order.buyerName || "Unknown"}</span>
-                            {order.buyerMobile && (
-                              <a href={`tel:${order.buyerMobile}`} className="text-xs text-green-600 hover:text-green-800 font-medium">
-                                📞 {order.buyerMobile}
-                              </a>
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {formatAddress(order.buyerLocation)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex flex-wrap items-center gap-3 pt-2">
-                      {order.status === 2 && (
-                        <button
-                          onClick={() => handlePickup(order.id)}
-                          disabled={loading}
-                          className="px-5 py-2.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Mark as Picked Up
-                        </button>
-                      )}
-
-                      {order.status === 3 && (
-                        <button
-                          onClick={() => handleMarkOutForDelivery(order.id)}
-                          disabled={loading}
-                          className="px-5 py-2.5 text-sm font-medium bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                          </svg>
-                          Mark Out for Delivery
-                        </button>
-                      )}
-
-                      {order.status === 4 && (
-                        <button
-                          onClick={() => handleDeliver(order.id)}
-                          disabled={loading}
-                          className="px-5 py-2.5 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Mark as Delivered
-                        </button>
-                      )}
-
-                      {order.status === 5 && (
-                        <div className="text-sm text-teal-600 font-medium">
-                          Waiting for buyer confirmation
-                        </div>
-                      )}
-
-                      {order.status === 6 && (
-                        <div className="flex items-center gap-2 text-sm text-green-600 font-semibold">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Order completed - Payment received
-                        </div>
-                      )}
-
-                      <button
-                        onClick={() => toggleExpand(order.id)}
-                        className="ml-auto px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2 border border-gray-300"
-                      >
-                        <span className="font-medium">
-                          {expandedOrderId === order.id ? "Hide" : "View"} Details
-                        </span>
-                        <svg
-                          className={`w-4 h-4 transition-transform ${expandedOrderId === order.id ? "rotate-180" : ""}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Expanded Details */}
-                    {expandedOrderId === order.id && (
-                      <div className="border-t border-gray-200 pt-4 mt-4">
-                        <div className="grid md:grid-cols-3 gap-4">
-                          {/* Price Breakdown */}
-                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <h4 className="font-semibold text-gray-900 mb-3 text-sm">Earnings</h4>
-                            <div className="space-y-2 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Product Value:</span>
-                                <span className="font-semibold">{order.productPrice} AGT</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Your Fee:</span>
-                                <span className="font-semibold text-green-600">{order.logisticsFee} AGT</span>
-                              </div>
-                              <div className="flex justify-between border-t pt-2 font-semibold">
-                                <span>Total Order Value:</span>
-                                <span className="text-blue-600">{order.totalPrice} AGT</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Timeline */}
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                            <h4 className="font-semibold text-gray-900 mb-3 text-sm">Timeline</h4>
-                            <div className="space-y-1.5 text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Created:</span>
-                                <span className="font-medium">{formatTimestamp(order.createdAt)}</span>
-                              </div>
-                              {order.confirmAt > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Shipped:</span>
-                                  <span className="font-medium">{formatTimestamp(order.confirmAt)}</span>
-                                </div>
-                              )}
-                              {order.pickedUpAt > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Picked Up:</span>
-                                  <span className="font-medium">{formatTimestamp(order.pickedUpAt)}</span>
-                                </div>
-                              )}
-                              {order.outForDeliveryAt > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Out:</span>
-                                  <span className="font-medium">{formatTimestamp(order.outForDeliveryAt)}</span>
-                                </div>
-                              )}
-                              {order.deliveredAt > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Delivered:</span>
-                                  <span className="font-medium">{formatTimestamp(order.deliveredAt)}</span>
-                                </div>
-                              )}
-                              {order.completedAt > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-600">Completed:</span>
-                                  <span className="font-medium">{formatTimestamp(order.completedAt)}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Additional Info */}
-                          <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                            <h4 className="font-semibold text-gray-900 mb-3 text-sm">Additional Info</h4>
-                            <div className="text-xs space-y-1.5">
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Product ID:</span>
-                                <span className="font-medium">#{order.productId}</span>
-                              </div>
-                              {order.location && (
-                                <div className="pt-2 border-t">
-                                  <span className="text-gray-600 block mb-1">Current Location:</span>
-                                  <p className="font-medium break-words">{order.location}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+      {/* ── AVAILABLE ORDERS ──────────────────────────────────────────────── */}
+      {mainTab === "available" && (
+        <div>
+          {availableOrders.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+              <Star className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">No available orders</h3>
+              <p className="text-gray-500 text-sm">New delivery jobs will appear here when sellers confirm shipment</p>
             </div>
-          ))}
+          ) : (
+            <div className="space-y-4">
+              {availableOrders.map(order => {
+                const isActing = actionLoading === order.id;
+                return (
+                  <div key={order.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-green-100 overflow-hidden">
+                    {/* Green top accent for available jobs */}
+                    <div className="h-1 bg-gradient-to-r from-green-400 to-emerald-500" />
+                    <div className="flex flex-col lg:flex-row">
+
+                      {/* Left */}
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Order ID</p>
+                            <p className="text-2xl font-bold text-gray-900">#{order.id}</p>
+                          </div>
+                          <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border bg-blue-100 text-blue-800 border-blue-200">READY FOR PICKUP</span>
+                          <div>
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Product</p>
+                            <p className="text-sm font-bold text-gray-900 mt-0.5 leading-tight">{order.name}</p>
+                            <p className="text-xs text-gray-500">{order.category}</p>
+                          </div>
+                          <div className="pt-2 border-t border-gray-200">
+                            <div>
+                              <p className="text-xs text-gray-500">You Earn</p>
+                              <p className="text-2xl font-bold text-green-600">{parseFloat(order.logisticsFee).toFixed(2)} <span className="text-sm font-medium">AGT</span></p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right */}
+                      <div className="flex-1 p-5 space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          {/* Pickup from */}
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Pickup From (Seller)</p>
+                            <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                              <p className="text-sm font-semibold text-gray-900">{order.sellerName || "Unknown"}</p>
+                              <p className="text-xs text-gray-600 mt-0.5">{fmtAddr(order.sellerLocation)}</p>
+                              {order.sellerMobile && <a href={`tel:${order.sellerMobile}`} className="text-xs text-blue-600 font-medium mt-1 block">📞 {order.sellerMobile}</a>}
+                            </div>
+                          </div>
+                          {/* Deliver to */}
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1 flex items-center gap-1"><Navigation className="w-3 h-3" /> Deliver To (Buyer)</p>
+                            <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+                              <p className="text-sm font-semibold text-gray-900">{order.buyerName || "Unknown"}</p>
+                              <p className="text-xs text-gray-600 mt-0.5">{fmtAddr(order.buyerLocation)}</p>
+                              {order.buyerMobile && <a href={`tel:${order.buyerMobile}`} className="text-xs text-green-600 font-medium mt-1 block">📞 {order.buyerMobile}</a>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Order detail strip */}
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 grid grid-cols-3 gap-3 text-sm">
+                          <div><p className="text-xs text-gray-500 mb-0.5">Qty</p><p className="font-semibold">{order.quantity}</p></div>
+                          <div><p className="text-xs text-gray-500 mb-0.5">Product Value</p><p className="font-semibold">{parseFloat(order.productPrice).toFixed(2)} AGT</p></div>
+                          <div><p className="text-xs text-gray-500 mb-0.5">Created</p><p className="font-semibold text-xs">{fmtTime(order.createdAt)}</p></div>
+                        </div>
+
+                        <button onClick={() => setModal({ type: "accept", order })} disabled={isActing}
+                          className="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                          {isActing ? <><Loader2 className="w-5 h-5 animate-spin" /> Accepting...</> : <><Star className="w-5 h-5" /> Accept This Delivery Job</>}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── MY DELIVERIES ─────────────────────────────────────────────────── */}
+      {mainTab === "my-orders" && (
+        <div>
+          {/* Status sub-tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-5">
+            {MY_DELIVERIES_TABS.map(tab => (
+              <button key={tab.id} onClick={() => setStatusTab(tab.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0 ${statusTab === tab.id ? "bg-green-600 text-white shadow-md" : "bg-white text-gray-700 hover:bg-green-50 border border-gray-200"}`}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {filteredMyOrders.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+              <Truck className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">No deliveries found</h3>
+              <p className="text-gray-500 text-sm">{statusTab === "all" ? "Accept jobs from the Available Jobs tab" : "No orders with this status"}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredMyOrders.map(order => {
+                const isExpanded  = expandedId === order.id;
+                const isActing    = actionLoading === order.id;
+                const canPickup   = order.status === 2;
+                const canMarkOFD  = order.status === 3;
+                const canDeliver  = order.status === 4;
+
+                return (
+                  <div key={order.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 overflow-hidden">
+                    <div className="flex flex-col lg:flex-row">
+
+                      {/* Left */}
+                      <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-5 lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Order ID</p>
+                            <p className="text-2xl font-bold text-gray-900">#{order.id}</p>
+                          </div>
+                          {getStatusBadge(order.status)}
+                          <div>
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Product</p>
+                            <p className="text-sm font-bold text-gray-900 mt-0.5 leading-tight">{order.name}</p>
+                            <p className="text-xs text-gray-500">{order.category}</p>
+                          </div>
+                          <div className="pt-2 border-t border-gray-200 grid grid-cols-2 gap-2">
+                            <div><p className="text-xs text-gray-500">Qty</p><p className="font-bold text-gray-900">{order.quantity}</p></div>
+                            <div><p className="text-xs text-gray-500">You Earn</p><p className="font-bold text-green-600 text-sm">{parseFloat(order.logisticsFee).toFixed(2)} AGT</p></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right */}
+                      <div className="flex-1 p-5 space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Pickup From (Seller)</p>
+                            <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                              <p className="text-sm font-semibold text-gray-900">{order.sellerName || "Unknown"}</p>
+                              <p className="text-xs text-gray-600 mt-0.5">{fmtAddr(order.sellerLocation)}</p>
+                              {order.sellerMobile && <a href={`tel:${order.sellerMobile}`} className="text-xs text-blue-600 font-medium mt-1 block">📞 {order.sellerMobile}</a>}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Deliver To (Buyer)</p>
+                            <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+                              <p className="text-sm font-semibold text-gray-900">{order.buyerName || "Unknown"}</p>
+                              <p className="text-xs text-gray-600 mt-0.5">{fmtAddr(order.buyerLocation)}</p>
+                              {order.buyerMobile && <a href={`tel:${order.buyerMobile}`} className="text-xs text-green-600 font-medium mt-1 block">📞 {order.buyerMobile}</a>}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {canPickup && (
+                            <button onClick={() => setModal({ type: "pickup", order })} disabled={isActing}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50">
+                              {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Package className="w-3.5 h-3.5" />} Mark as Picked Up
+                            </button>
+                          )}
+                          {canMarkOFD && (
+                            <button onClick={() => setModal({ type: "outForDelivery", order })} disabled={isActing}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50">
+                              {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />} Out for Delivery
+                            </button>
+                          )}
+                          {canDeliver && (
+                            <button onClick={() => setModal({ type: "deliver", order })} disabled={isActing}
+                              className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                              {isActing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Mark as Delivered
+                            </button>
+                          )}
+
+                          {order.status === 5 && <span className="text-sm text-teal-600 font-medium self-center">🕐 Waiting for buyer confirmation</span>}
+                          {order.status === 6 && <span className="text-sm text-green-600 font-semibold self-center flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Completed — {parseFloat(order.logisticsFee).toFixed(2)} AGT received</span>}
+
+                          <button onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                            className="ml-auto flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition-colors border border-gray-300">
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            {isExpanded ? "Hide" : "Details"}
+                          </button>
+                        </div>
+
+                        {/* Expanded */}
+                        {isExpanded && (
+                          <div className="border-t border-gray-200 pt-4 grid md:grid-cols-3 gap-4">
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                              <h4 className="font-semibold text-gray-900 text-sm mb-3">Earnings</h4>
+                              <div className="space-y-2 text-xs">
+                                <div className="flex justify-between"><span className="text-gray-500">Product Value</span><span className="font-semibold">{parseFloat(order.productPrice).toFixed(2)} AGT</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">Platform Fee</span><span>{parseFloat(order.platformFee).toFixed(4)} AGT</span></div>
+                                <div className="flex justify-between text-green-600 font-semibold border-t pt-2"><span>Your Logistics Fee</span><span>{parseFloat(order.logisticsFee).toFixed(2)} AGT</span></div>
+                                <div className="flex justify-between border-t pt-2 font-semibold"><span>Total Order Value</span><span className="text-blue-600">{parseFloat(order.totalPrice).toFixed(2)} AGT</span></div>
+                              </div>
+                            </div>
+
+                            <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                              <h4 className="font-semibold text-gray-900 text-sm mb-3">Timeline</h4>
+                              <div className="space-y-1.5 text-xs">
+                                {[
+                                  ["Created",          order.createdAt],
+                                  ["Shipped",          order.confirmAt],
+                                  ["Picked Up",        order.pickedUpAt],
+                                  ["Out for Delivery", order.outForDeliveryAt],
+                                  ["Delivered",        order.deliveredAt],
+                                  ["Completed",        order.completedAt],
+                                ].filter(([, ts]) => ts && ts > 0).map(([label, ts]) => (
+                                  <div key={label} className="flex justify-between gap-2">
+                                    <span className="text-gray-500 flex-shrink-0">{label}:</span>
+                                    <span className="font-medium text-right">{fmtTime(ts)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
+                              <h4 className="font-semibold text-gray-900 text-sm mb-3">Details</h4>
+                              <div className="text-xs space-y-2">
+                                <div className="flex justify-between"><span className="text-gray-500">Product ID</span><span className="font-medium">#{order.productId}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-500">Order ID</span><span className="font-medium">#{order.id}</span></div>
+                                {order.location && (
+                                  <div className="pt-2 border-t">
+                                    <p className="text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Last Location</p>
+                                    <p className="font-medium break-words">{order.location}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

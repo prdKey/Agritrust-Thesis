@@ -33,8 +33,7 @@ export default function ProductDetails({ product }) {
 
   const handleBuy = async () =>
   {
-    
-    await buyProduct(product.id, quantity);
+    navigate("/checkout", { state: { items: [{ ...product, quantity }] } });
   }
   const increment = () => setQuantity((q) => Math.min(q + 1, product.stock));
   const decrement = () => setQuantity((q) => Math.max(q - 1, 1));

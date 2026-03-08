@@ -8,139 +8,133 @@ const authHeader = () => ({
     
 export const getOrdersBySeller = async () => {
     const res = await axios.get(`${API_URL}/orders/seller`,
-        {
-            headers: authHeader(),
-        }
+        { headers: authHeader() }
     );
     return res.data
 }
 
 export const getOrdersByBuyer = async () => {
     const res = await axios.get(`${API_URL}/orders/buyer`,
-        {
-            headers: authHeader(),
-        }
+        { headers: authHeader() }
     )
-
     return res.data
 }
 
-export const confirmReceipt = async (orderId) =>{
-    const res = await axios.put(`${API_URL}/orders/confirm-receipt`, {orderId},
-        {
-            headers: authHeader(),
-        }
+export const confirmReceipt = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/confirm-receipt`, { orderId },
+        { headers: authHeader() }
     )
-
     return res.data
 }
-export const buyProduct = async (productId, quantity) =>
-{
-    
-    const res = await axios.post(`${API_URL}/orders/checkout`, {productId, quantity},
-        {
-            headers: authHeader(),
-        }
+
+export const buyProduct = async (productId, quantity) => {
+    const res = await axios.post(`${API_URL}/orders/checkout`, { productId, quantity },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const confirmShipment = async(orderId) =>
-{
-    const res = await axios.put(`${API_URL}/orders/confirm-shipment`, {orderId},
-        {
-            headers: authHeader(),
-        }
+export const confirmShipment = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/confirm-shipment`, { orderId },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const getOrdersByLogistics = async () =>
-{
+export const getOrdersByLogistics = async () => {
     const res = await axios.get(`${API_URL}/orders/logistics`,
-        {
-            headers: authHeader(),
-        }
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const pickupOrder = async (orderId, location) =>
-{
-    const res = await axios.put(`${API_URL}/orders/pickup-order`, {orderId, location},
-        {
-            headers: authHeader(),
-        }
+export const pickupOrder = async (orderId, location) => {
+    const res = await axios.put(`${API_URL}/orders/pickup-order`, { orderId, location },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const confirmDelivery = async (orderId, location) =>
-{
-    const res = await axios.put(`${API_URL}/orders/confirm-delivery`, {orderId, location},
-        {
-            headers: authHeader(),
-        }
+export const confirmDelivery = async (orderId, location) => {
+    const res = await axios.put(`${API_URL}/orders/confirm-delivery`, { orderId, location },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const getAvailableOrders = async () =>
-{
+export const getAvailableOrders = async () => {
     const res = await axios.get(`${API_URL}/orders/available-orders`,
-        {
-            headers: authHeader(),
-        }
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const acceptOrder = async (orderId) =>
-{
-    const res = await axios.put(`${API_URL}/orders/accept-order`, {orderId},
-        {
-            headers: authHeader(),
-        }
+export const acceptOrder = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/accept-order`, { orderId },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const updateOrderLocation = async (orderId, location) => 
-{
-    const res = await axios.put(`${API_URL}/orders/update-location`, {orderId, location},
-        {
-            headers: authHeader(),
-        }
-    ); 
-
-    return res.data
-}
-
-export const markOutForDelivery = async (orderId) =>
-{
-    const res = await axios.put(`${API_URL}/orders/mark-out-for-delivery`, {orderId},
-        {
-            headers: authHeader(),
-        }
+export const updateOrderLocation = async (orderId, location) => {
+    const res = await axios.put(`${API_URL}/orders/update-location`, { orderId, location },
+        { headers: authHeader() }
     );
-    
     return res.data
 }
 
-export const getOrderById = async (orderId) =>
-{
+export const markOutForDelivery = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/mark-out-for-delivery`, { orderId },
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const getOrderById = async (orderId) => {
     const res = await axios.get(`${API_URL}/orders/${orderId}`,
-        {
-            headers: authHeader(),
-        }
+        { headers: authHeader() }
     );
-
     return res.data
 }
+
+export const cancelOrderBySeller = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/cancel-by-seller`, { orderId },
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const cancelOrderByBuyer = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/cancel-by-buyer`, { orderId },
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const openDispute = async (orderId) => {
+    const res = await axios.put(`${API_URL}/orders/open-dispute`, { orderId },
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const resolveDispute = async (orderId, refundBuyer) => {
+    const res = await axios.put(`${API_URL}/orders/resolve-dispute`, { orderId, refundBuyer },
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const getDisputedOrders = async () => {
+    const res = await axios.get(`${API_URL}/orders/disputed`,
+        { headers: authHeader() }
+    );
+    return res.data
+}
+
+export const getAllOrders = async () => {
+    const res = await axios.get(`${API_URL}/orders/all`,
+        { headers: authHeader() }
+    );
+    return res.data
+} 

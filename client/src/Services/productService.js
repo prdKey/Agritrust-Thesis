@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getToken } from "./tokenService.js";
+import { id } from "ethers";
 
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -9,8 +10,9 @@ const authHeader = () => ({
     
 export const getAllProducts = async () => {
     const res = await axios.get(`${API_URL}/products/`);
-    return res.data
+    return res.data.product;
 }
+
 
 export const getProductsByUser = async (id) =>
 {

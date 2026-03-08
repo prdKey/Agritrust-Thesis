@@ -15,3 +15,12 @@ export const getBalance = async () => {
     return res.data
 }
 
+export const getAllUsers = async () => {
+    const res = await axios.get(`${API_URL}/users/`,
+        {
+            headers: authHeader(),
+        }
+    );
+    return res.data.users;
+}
+
