@@ -19,7 +19,9 @@ const Marketplace = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
+        
         const data = await getAllProducts();
+        
         if(keyword){
           const filteredProducts = data.products.filter(p => p.name.toLowerCase().includes(keyword.toLowerCase()))
           setProducts(filteredProducts)
