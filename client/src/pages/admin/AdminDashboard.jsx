@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useUserContext } from "../../context/UserContext";
+import { useUserContext } from "../../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { getToken } from "../../services/tokenService";
+import { getToken } from "../../services/tokenService.js";
 import axios from "axios";
 import {
   Scale, Users, ShoppingBag, DollarSign, TrendingUp,
