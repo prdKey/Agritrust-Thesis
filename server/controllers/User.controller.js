@@ -2,6 +2,16 @@ import User from "../models/User.model.js";
 import { tokenContract } from "../blockchain/contract.js";
 import { formatUnits } from "ethers";
 
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;

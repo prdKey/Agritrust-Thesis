@@ -205,6 +205,42 @@ export const getAvailableOrders = async (req, res) => {
   }
 }
 
+export const getAllOrders = async (req, res) => {
+  try {
+    const data = await orderManagerContract.getAllOrders();
+    const users = await User.findAll();
+
+    const orders = data.map((o) => {
+      const seller = users.find(
+        u => u.walletAddress.toLowerCase() === o.sellerAddress.toLowerCase()
+      );
+      const buyer = users.find(
+        u => u.walletAddress.toLowerCase() === o.buyerAddress.toLowerCase()
+      );
+      const logistics = users.find(
+        u => u.walletAddress.toLowerCase() === o.logisticsAddress.toLowerCase()
+      );
+
+      return {
+        ...formatOrder(o),
+        sellerLocation: seller?.address || null,
+        sellerName: seller ? `${seller.firstName} ${seller.lastName}` : "Unknown",
+        sellerMobile: seller?.mobileNumber || null,
+        buyerLocation: buyer?.address || null,
+        buyerName: buyer ? `${buyer.firstName} ${buyer.lastName}` : "Unknown",
+        buyerMobile: buyer?.mobileNumber || null,
+        logisticsName: logistics ? `${logistics.firstName} ${logistics.lastName}` : null,
+        logisticsMobile: logistics?.mobileNumber || null,
+      }
+    });
+
+    res.json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
 export const getOrdersByLogistics = async(req, res) => {
   try {
     const logisticsAddress = req.user.walletAddress;
@@ -312,10 +348,47 @@ export const confirmReceipt = async (req, res) => {
   }
 };
 
+export const getDisputedOrders = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    const allOrders = [];
+
+    // Loop through all order IDs to find disputed ones
+    // (since contract doesn't have a getDisputedOrders view function)
+    const orderCount = Number(await orderManagerContract.orderCount());
+    for (let i = 1; i <= orderCount; i++) {
+      const o = await orderManagerContract.getOrderById(i);
+      if (Number(o.status) === 7) { // 7 = Disputed
+        const seller   = users.find(u => u.walletAddress?.toLowerCase() === o.sellerAddress?.toLowerCase());
+        const buyer    = users.find(u => u.walletAddress?.toLowerCase() === o.buyerAddress?.toLowerCase());
+        const logistics = users.find(u => u.walletAddress?.toLowerCase() === o.logisticsAddress?.toLowerCase());
+
+        allOrders.push({
+          ...formatOrder(o),
+          sellerLocation:  seller?.address || null,
+          sellerName:      seller  ? `${seller.firstName} ${seller.lastName}`  : "Unknown",
+          sellerMobile:    seller?.mobileNumber || null,
+          buyerLocation:   buyer?.address || null,
+          buyerName:       buyer   ? `${buyer.firstName} ${buyer.lastName}`    : "Unknown",
+          buyerMobile:     buyer?.mobileNumber || null,
+          logisticsName:   logistics ? `${logistics.firstName} ${logistics.lastName}` : null,
+          logisticsMobile: logistics?.mobileNumber || null,
+        });
+      }
+    }
+
+    res.json({ orders: allOrders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.reason || err.message });
+  }
+};
+
 /* OPEN DISPUTE */
 export const openDispute = async (req, res) => {
   try {
-    const { orderId, senderAddress } = req.body;
+    const senderAddress = req.user.walletAddress; // ← get from JWT, not body
+    const { orderId } = req.body;
 
     const tx = await orderManagerContract.openDispute(orderId, senderAddress);
     await tx.wait();

@@ -8,13 +8,13 @@ export default function UpdateLocation() {
         // Simulate sending location updates every 5 seconds
         const interval = setInterval(() => {
             const data = {
-                orderId: "4", // Example order ID
-                lat: 15.841335 + Math.random() * 0.1, // Simulated latitude
-                lng: 120.216652 + Math.random() * 0.1 // Simulated longitude
+                orderId: "9", // Example order ID
+                lat: 16.5023 + Math.random() * 0.1, // Simulated latitude
+                lng: 120.5960 + Math.random() * 0.1 // Simulated longitude
             };
             socket.emit("sendLocation", data);
-        }, 20000);
-
+        }, 5000);
+     
         return () => clearInterval(interval);
     }, []);
 

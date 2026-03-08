@@ -18,7 +18,8 @@ export const getAllProducts = async (req, res) => {
         u => u.walletAddress.toLowerCase() === p.sellerAddress.toLowerCase()
       );
       return {
-        id: Number(p.id),                 // BigInt -> number
+        id: Number(p.id),
+        sellerName: owner ? owner.firstName + " " + owner.lastName : "Unknown", 
         sellerAddress: p.sellerAddress,   // blockchain wallet
         imageCID: p.imageCID,
         name: p.name,
@@ -30,6 +31,7 @@ export const getAllProducts = async (req, res) => {
       };
     });
     res.json({ products });
+    console.log(products)
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });

@@ -8,6 +8,8 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Account from "./pages/Account.jsx";
 import Profile from "./pages/user/Profile.jsx";
+import Checkout from "./pages/user/Checkout.jsx";
+import Notifications from "./pages/user/Notifications.jsx";
 import Address from "./pages/user/Address.jsx";
 import PageNotFound from "./pages/PageNotFound.jsx"
 import Dashboard from "./pages/user/Dashboard.jsx";
@@ -24,44 +26,72 @@ import LogisticDashboard from "./pages/logistic/LogisticDashboard.jsx";
 import LogisticAvailableOrders from "./pages/logistic/LogisticAvailableOrder.jsx";
 import LogisticOrders from "./pages/logistic/LogisticOrder.jsx";
 import TrackOrder from "./pages/TrackOrder";
+import AdminPanel from "./pages/admin/AdminPanel.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import UserManagement from "./pages/admin/UserManagement";
+import AdminApplications from "./pages/admin/AdminApplications";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminDisputes from "./pages/admin/AdminDisputes";
 
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/seller" element={<ProtectedRoute roles={"SELLER"}><SellerPanel/></ProtectedRoute>}>
+        <Route path="/seller" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><SellerPanel/></ProtectedRoute>}>
           <Route index element={<SellerDashboard/>}/>
           <Route path="dashboard" element={<SellerDashboard/>}/>
           <Route path="products" element={<SellerProducts />}/>
           <Route path="orders" element={<SellerOrders />}/>
+          <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
+
+        <Route path="/admin" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><AdminPanel/></ProtectedRoute>}>
+          <Route index element={<AdminDashboard/>}/>
+          <Route path="dashboard" element={<AdminDashboard/>}/>
+          <Route path="users" element={<UserManagement/>}/>
+          <Route path="applications" element={<AdminApplications/>}/>
+          <Route path="products" element={<AdminProducts />}/>
+          <Route path="disputes" element={<AdminDisputes />}/>
+          <Route path="reports" element={<AdminReports />}/>
+          <Route path="*" element={<div>Page Not Found</div>}/>
+        </Route>
+
         <Route path="/track-order/:orderId" element={<TrackOrder/>}/>
-        <Route path="/logistic" element={<ProtectedRoute roles={"LOGISTICS"} ><LogisticPanel/></ProtectedRoute>}>
+
+        <Route path="/logistic" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]} ><LogisticPanel/></ProtectedRoute>}>
           <Route index element={<LogisticDashboard/>}/>
           <Route path="dashboard" element={<LogisticDashboard/>}/>
           <Route path="available-orders" element={<LogisticAvailableOrders />}/>
           <Route path="orders" element={<LogisticOrders/>}/>
+          <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
+
         <Route path="/about" element={<Home />} />
+
         <Route path="/" element={<Market />} >
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register/>}/>
         </Route>
-        <Route path="/search" element={<Market />} >
-        </Route>
+        
+        <Route path="/search" element={<Market />} />
+
         <Route path="/products/:id" element={<Product/>}/>
+
         <Route path="/user" element={<ProtectedRoute ><Account/></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />}/>
           <Route path="profile" element={<Profile/>}/>
           <Route path="address" element={<Address/>}/>
           <Route path="settings" element={<Settings/>}/>
+          <Route path="notifications" element={<Notifications/>}/>
           <Route path="profile" element={<div>profile</div>}/>
           <Route path="purchase" element={<Orders/>}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route> 
-        <Route path="/cart" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><Cart/></ProtectedRoute>}/>
 
+        <Route path="/cart" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><Cart/></ProtectedRoute>}/>
+        <Route path="/checkout" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><Checkout/></ProtectedRoute>}/>
         <Route path="/*" element={<PageNotFound/>} />
       </Route>
     </Routes>

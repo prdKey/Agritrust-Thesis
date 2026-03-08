@@ -28,3 +28,11 @@ export const updateCartQuantity = async (data) => {
   });
   return res.data;
 };
+
+export const removeFromCart = async (productId) => {
+  console.log(`Removing product ${productId} from cart`);
+  const res = await axios.delete(`${API_URL}/carts/${productId}`, {
+    headers: authHeader(),
+  });
+  return res.data;
+}
