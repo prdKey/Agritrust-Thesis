@@ -19,9 +19,11 @@ const Marketplace = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
+        
         const data = await getAllProducts();
+        
         if(keyword){
-          const filteredProducts = data.products.filter(p => p.name.includes(keyword))
+          const filteredProducts = data.products.filter(p => p.name.toLowerCase().includes(keyword.toLowerCase()))
           setProducts(filteredProducts)
         } else{
           setProducts(data.products);
@@ -63,6 +65,7 @@ const Marketplace = () => {
             setInStockOnly={setInStockOnly}
           />
         </aside>
+        
         {/* Products */}
         <main className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {loading ? (

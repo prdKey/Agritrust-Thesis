@@ -60,7 +60,7 @@ const ProductCard = ({ product }) => {
           {/* Location */}
           <div className="flex items-center gap-1 sm:gap-2 text-gray-500 text-[9px] mt-1">
             <MapPin className="w-3 h-3" />
-            Dagupan, Pangasinan
+            {  product.ownerAddress.barangay + ", " + product.ownerAddress.city}
           </div>
         </div>
       </div>

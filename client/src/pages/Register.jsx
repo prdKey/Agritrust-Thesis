@@ -1,11 +1,20 @@
-import { useState } from "react";
-import { registerWithWallet } from "../auth/authService.js";
-import { ethers } from "ethers";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../context/UserContext.jsx";
+import { getNonce, verifySignature } from "../services/authService.js";
+import {
+  getPangasinanCities,
+  getBarangaysByCity,
+} from "../services/addressService.js";
 
 export default function Register() {
+  const { login } = useUserContext();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const [cities, setCities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -13,53 +22,117 @@ export default function Register() {
     phone: "",
     gender: "",
     dob: "",
+    houseNumber: "",
+    street: "",
+    barangay: "",
+    city: "",
+    postalCode: "",
   });
+
+  // Load cities
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const res = await getPangasinanCities();
+        setCities(res.data.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (err) {
+        console.error("Failed to load cities:", err);
+      }
+    };
+    loadCities();
+  }, []);
+
+  // Load barangays when city changes
+  useEffect(() => {
+    const loadBarangays = async () => {
+      if (!formData.city) return;
+      const selectedCity = cities.find((c) => c.name === formData.city);
+      if (!selectedCity) return;
+
+      try {
+        const res = await getBarangaysByCity(selectedCity.code);
+        setBarangays(res.data.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (err) {
+        console.error("Failed to load barangays:", err);
+      }
+    };
+    loadBarangays();
+  }, [formData.city, cities]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "city") {
+      setFormData((prev) => ({ ...prev, city: value, barangay: "" }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const connectWalletAndLogin = async () => {
-    if (!window.ethereum) return alert("MetaMask not detected!");
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return null;
+    }
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    return accounts[0];
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
 
     try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
+      const walletAddress = await connectWallet();
+      if (!walletAddress) return;
 
-      const data = await registerWithWallet(
-        address,
+      const nonce = await getNonce(
+        walletAddress,
         formData.firstName,
         formData.lastName,
         formData.email,
         formData.phone,
         formData.gender,
-        formData.dob
+        formData.dob,
+        formData.houseNumber,
+        formData.street,
+        formData.barangay,
+        formData.city,
+        formData.postalCode
       );
-      alert(data.message);
+
+      const messageToSign = `Sign this message to authenticate: ${nonce}`;
+      const signature = await window.ethereum.request({
+        method: "personal_sign",
+        params: [messageToSign, walletAddress],
+      });
+
+      const user = await verifySignature(walletAddress, signature);
+      login(user);
+      alert("Registration successful!");
+      navigate("/");
     } catch (err) {
-      alert("Registration failed: " + (err?.response?.data?.message || err.message));
+      console.error(err);
+      alert("Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    connectWalletAndLogin();
-  };
+  const isFormComplete = Object.values(formData).every((v) => v.trim() !== "");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div onClick={()=> navigate("/")} className="absolute inset-0 bg-black/50" />
+      <div
+        onClick={() => navigate("/")}
+        className="absolute inset-0 bg-black/50"
+      />
 
       {/* Modal */}
-      <div  className="relative z-50 bg-white shadow-xl rounded-lg w-full max-w-md max-h-[80vh] p-6">
-         {/* Header */}
+      <div className="relative z-50 bg-white shadow-xl rounded-lg w-full max-w-md max-h-[80vh] p-6">
+        {/* Header */}
         <div className="flex flex-col justify-center items-center mb-4">
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
@@ -71,106 +144,70 @@ export default function Register() {
             Register your wallet to continue.
           </p>
         </div>
-        <form
-          onSubmit={handleSubmit}
-        >
-          {/* Input Fields*/}
-          <div className="overflow-y-auto max-h-[40vh] scroll p-2">
-            {/* First Name */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                required
-              />
-            </div>
 
-            {/* Last Name */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div className="overflow-y-auto max-h-[40vh] p-2 space-y-3 scroll">
+            <InputField label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
+            <InputField label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
+            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
+            <InputField label="Phone Number" name="phone" type="tel" value={formData.phone} onChange={handleChange} pattern="^(09\d{9}|\+639\d{9})$"  />
+            <SelectField label="Gender" name="gender" value={formData.gender} onChange={handleChange} options={["Male","Female","Other"]} />
+            <InputField label="Date of Birth" name="dob" type="date" value={formData.dob} onChange={handleChange} />
 
-            {/* Email */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="example@email.com"
-                required
-              />
-            </div>
+            <InputField label="House/Unit Number" name="houseNumber" value={formData.houseNumber} onChange={handleChange} />
+            <InputField label="Street" name="street" value={formData.street} onChange={handleChange} />
 
-            {/* Phone */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                pattern="^09\d{9}$"
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="09XXXXXXXXX"
-                required
-              />
-            </div>
-
-            {/* Gender */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">Gender</label>
+            {/* City */}
+            <div>
+              <label className="block font-medium mb-1">City / Municipality</label>
               <select
-                name="gender"
-                value={formData.gender}
+                name="city"
+                value={formData.city}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
                 required
               >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="">Select City / Municipality</option>
+                {cities.map((city) => (
+                  <option key={city.code} value={city.name}>{city.name}</option>
+                ))}
               </select>
             </div>
 
-            {/* Date of Birth */}
-            <div className="mb-3">
-              <label className="block text-gray-700 font-medium mb-1">Date of Birth</label>
-              <input
-                type="date"
-                name="dob"
-                value={formData.dob}
+            {/* Barangay */}
+            <div>
+              <label className="block font-medium mb-1">Barangay</label>
+              <select
+                name="barangay"
+                value={formData.barangay}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400"
                 required
-              />
+                disabled={!formData.city}
+              >
+                <option value="">Select Barangay</option>
+                {barangays.map((b) => (
+                  <option key={b.code} value={b.name}>{b.name}</option>
+                ))}
+              </select>
             </div>
+
+            <InputField label="Postal Code" name="postalCode" value={formData.postalCode} onChange={handleChange} />
           </div>
-          {/* Submit Button */}
+
+          {/* Submit / Wallet Connect */}
           <div className="flex flex-col justify-center mt-5">
             <button
               type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer"
+              disabled={!isFormComplete || loading}
+              className={`w-full p-2 rounded-lg text-white transition ${
+                isFormComplete ? "bg-green-500 hover:bg-green-600" : "bg-gray-400 cursor-not-allowed"
+              }`}
             >
-              {loading ? "Registering..." : "Register Wallet"}
+              {loading ? "Processing..." : "Register"}
             </button>
-            <p  
+
+            <p
               onClick={() => navigate("/login")}
               className="text-xs text-gray-400 font-light text-center m-2 hover:underline hover:text-green-600 cursor-pointer"
             >
@@ -182,6 +219,45 @@ export default function Register() {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Input Component
+function InputField({ label, name, type = "text", value, onChange, pattern }) {
+  return (
+    <div>
+      <label className="block text-gray-700 font-medium mb-1">{label}</label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        pattern={pattern}
+        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+        required
+      />
+    </div>
+  );
+}
+
+// Select Component
+function SelectField({ label, name, value, onChange, options }) {
+  return (
+    <div>
+      <label className="block text-gray-700 font-medium mb-1">{label}</label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+        required
+      >
+        <option value="">Select {label}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
     </div>
   );
 }

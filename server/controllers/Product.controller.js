@@ -1,39 +1,38 @@
 import {contract, productManagerContract, orderManagerContract} from "../blockchain/contract.js"
 import { User } from "../models/index.js"   
+import { parseUnits, formatUnits } from "ethers";
 
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    
-    const data = await productManagerContract.getAllActiveProducts()
+    // Fetch all products from the smart contract
+    const data = await productManagerContract.getAllActiveProducts();
 
+    // Fetch all users from your database
+    const users = await User.findAll();
 
-    const products = data.map((p) => ({
-      id: Number(p.id),         // BigInt -> string
-      sellerAddress: p.sellerAddress,
-      imageCID: p.imageCID,
-      name: p.name,
-      category: p.category,
-      pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
-      stock: Number(p.stock),      // BigInt -> string
-      active: p.active
-    }))
-    console.log({products})
+    // Map products with the owner's address
+    const products = data.map((p) => {
+      // Find the owner by wallet address
+      const owner = users.find(
+        u => u.walletAddress.toLowerCase() === p.sellerAddress.toLowerCase()
+      );
+      return {
+        id: Number(p.id),
+        sellerName: owner ? owner.firstName + " " + owner.lastName : "Unknown", 
+        sellerAddress: p.sellerAddress,   // blockchain wallet
+        imageCID: p.imageCID,
+        name: p.name,
+        category: p.category,
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)), // BigInt -> number
+        stock: Number(p.stock),                // BigInt -> number
+        active: p.active,
+        ownerAddress: owner ? owner.address : "Unknown" // physical address
+      };
+    });
     res.json({ products });
   } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// Get owner of a product
-export const getProductOwner = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    const owner = await product.getUser(); // thanks to Sequelize associations
-    res.json(owner);
-  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -44,14 +43,13 @@ export const getProductsBySeller = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
     
     const productsRaw = await productManagerContract.getProductsBySeller(user.walletAddress)
-    console.log(productsRaw)
     const products = productsRaw.map((p) => ({
         id: Number(p.id),         // BigInt -> string
         sellerAddress: p.sellerAddress,
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));
@@ -71,39 +69,37 @@ export const getProductById = async (req, res) => {
     // Convert BigNumbers to string for JSON
     const product = {
       id: Number(productRaw.id),
-      sellerAddress: productRaw.seller,
+      sellerAddress: productRaw.sellerAddress,
       name: productRaw.name,
       imageCID: productRaw.imageCID,
       category: productRaw.category,
-      pricePerUnit: Number(productRaw.pricePerUnit),
+      pricePerUnit: Number(formatUnits(productRaw.pricePerUnit, 18)),
       stock: Number(productRaw.stock),
       active: productRaw.active
     };
     res.status(201).json({product});
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 }
 
 export const createProduct = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const walletAddress = req.user.walletAddress;
     const { name, stock, category ,pricePerUnit, imageCID } = req.body;
-    console.log("")
 
-    const seller = await User.findByPk(userId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.listProduct(
       name,
       imageCID,
       category,
-      pricePerUnit,
+      parseUnits(pricePerUnit.toString(), 18), // Convert to Wei
       stock,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
     
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),      // BigInt -> string
@@ -111,7 +107,7 @@ export const createProduct = async (req, res) => {
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string (convert back from Wei)
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));
@@ -119,27 +115,26 @@ export const createProduct = async (req, res) => {
     res.json({products});
   }
   catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 }
 
 export const updateProduct = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const walletAddress = req.user.walletAddress;
     const { id, name, stock, category, pricePerUnit, imageCID } = req.body;
-    const seller = await User.findByPk(sellerId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.updateProduct(
       id,
       name,
       imageCID,
       category,
-      pricePerUnit,
+      parseUnits(pricePerUnit.toString(), 18),
       stock,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),    // BigInt -> string
@@ -147,7 +142,7 @@ export const updateProduct = async (req, res) => {
         imageCID: p.imageCID,
         name: p.name,
         category: p.category,
-        pricePerUnit: Number(p.pricePerUnit),  // BigInt -> string
+        pricePerUnit: Number(formatUnits(p.pricePerUnit, 18)),  // BigInt -> string
         stock: Number(p.stock),      // BigInt -> string
         active: p.active
       }));
@@ -159,17 +154,14 @@ export const updateProduct = async (req, res) => {
 }
 export const deleteProduct = async (req, res) => {
   try {
-    const sellerId = req.user.id;
+    const walletAddress = req.user.walletAddress
     const id = req.params.id
-    console.log(id)
-    const seller = await User.findByPk(sellerId);
-    if (!seller) return res.status(404).json({ message: "Seller not found" });
     const tx = await productManagerContract.deleteProduct(
       id,
-      seller.walletAddress
+      walletAddress
     )
     await tx.wait();
-    const productsRaw = await productManagerContract.getProductsBySeller(seller.walletAddress)
+    const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
 
     const products = productsRaw.map((p) => ({
         id: Number(p.id),       // BigInt -> string
@@ -189,19 +181,3 @@ export const deleteProduct = async (req, res) => {
   }
 }
 
-export const buyProduct = async (req, res) =>{
-  try{
-    const userId = req.user.id
-  
-    const user = await User.findByPk(userId);
-    
-    const {id, quantity} = req.body
-
-    const tx = await orderManagerContract.buyProduct(id, quantity, user.walletAddress);
-    console.log(tx)
-    res.status(201).json(tx);
-  }catch(err){
-    console.log(err)
-  }
-  
-} 

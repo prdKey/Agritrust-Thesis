@@ -1,4 +1,4 @@
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useUserContext } from "../../context/UserContext";
 import { useNavigate, useSearchParams} from "react-router-dom";
 import { ShoppingCart, Search, Bell, BadgeQuestionMark } from "lucide-react";
 import { useState, useEffect} from "react";
@@ -7,7 +7,7 @@ export default function Header() {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") || ""; 
   const [search, setSearch] = useState("");
-  const { user } = useAuth();
+  const {user} = useUserContext();
   const navigate = useNavigate();
   useEffect(()=>
   {
@@ -74,6 +74,11 @@ export default function Header() {
             <div className="flex w-full">
               <input
                 value={search}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(); 
+                  }
+                }}
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
                 placeholder="Search products..."

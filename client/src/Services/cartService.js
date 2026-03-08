@@ -1,7 +1,8 @@
 import axios from "axios";
-import { getToken } from "../auth/tokenService.js";
+import { getToken } from "./tokenService";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
 
 const authHeader = () => ({
   Authorization: `Bearer ${getToken()}`,
@@ -27,3 +28,11 @@ export const updateCartQuantity = async (data) => {
   });
   return res.data;
 };
+
+export const removeFromCart = async (productId) => {
+  console.log(`Removing product ${productId} from cart`);
+  const res = await axios.delete(`${API_URL}/carts/${productId}`, {
+    headers: authHeader(),
+  });
+  return res.data;
+}
