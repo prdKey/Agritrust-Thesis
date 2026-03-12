@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllProducts } from "../../services/productService";
+import { getAllProducts } from "../../services/productService.js";
 import { Eye, AlertTriangle, CheckCircle, XCircle, Package, Store, DollarSign } from "lucide-react";
 
 export default function AdminProducts() {

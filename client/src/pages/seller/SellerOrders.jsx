@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getOrdersBySeller, confirmShipment, cancelOrderBySeller, openDispute } from "../../services/orderService";
-import { useUserContext } from "../../context/UserContext";
+import { getOrdersBySeller, confirmShipment, cancelOrderBySeller, openDispute } from "../../services/orderService.js";
+import { useUserContext } from "../../context/UserContext.jsx";
 import {
   Package, CheckCircle, XCircle, AlertTriangle,
   ChevronDown, ChevronUp, Loader2, RefreshCw, Truck

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUserContext } from "../../context/UserContext";
+import { useUserContext } from "../../context/UserContext.jsx";
 import { getAvailableOrders, acceptOrder } from "../../services/orderService.js";
 
 export default function LogisticAvailableOrders() {

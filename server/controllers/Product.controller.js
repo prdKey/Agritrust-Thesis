@@ -68,7 +68,7 @@ export const getProductById = async (req, res) => {
     }
     // Convert BigNumbers to string for JSON
     const product = {
-      id: Number(productRaw.id),
+      productId: Number(productRaw.id),
       sellerAddress: productRaw.sellerAddress,
       name: productRaw.name,
       imageCID: productRaw.imageCID,
