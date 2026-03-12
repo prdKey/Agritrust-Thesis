@@ -11,6 +11,7 @@ import Profile from "./pages/user/Profile.jsx";
 import Checkout from "./pages/user/Checkout.jsx";
 import Notifications from "./pages/user/Notifications.jsx";
 import Address from "./pages/user/Address.jsx";
+import AddressForm from "./pages/user/Addressform";
 import PageNotFound from "./pages/PageNotFound.jsx"
 import Dashboard from "./pages/user/Dashboard.jsx";
 import Settings from "./pages/user/Settings.jsx";
@@ -83,13 +84,17 @@ function App() {
           <Route path="dashboard" element={<Dashboard />}/>
           <Route path="profile" element={<Profile/>}/>
           <Route path="address" element={<Address/>}/>
+          
           <Route path="settings" element={<Settings/>}/>
           <Route path="notifications" element={<Notifications/>}/>
           <Route path="profile" element={<div>profile</div>}/>
           <Route path="purchase" element={<Orders/>}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route> 
-
+        <Route path="/address" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><AddressForm/></ProtectedRoute>}>
+          <Route path="new" element={<AddressForm/>}/>
+          <Route path="edit/:id" element={<AddressForm/>}/>
+        </Route>
         <Route path="/cart" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><Cart/></ProtectedRoute>}/>
         <Route path="/checkout" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS"]}><Checkout/></ProtectedRoute>}/>
         <Route path="/*" element={<PageNotFound/>} />

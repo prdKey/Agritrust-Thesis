@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useUserContext } from "../../context/UserContext";
+import { useUserContext } from "../../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { getOrdersByLogistics, getAvailableOrders, acceptOrder } from "../../services/orderService";
+import { getOrdersByLogistics, getAvailableOrders, acceptOrder } from "../../services/orderService.js";
 import {
   Truck, DollarSign, Package, CheckCircle, Clock,
   Navigation, Star, TrendingUp, MapPin, AlertCircle,

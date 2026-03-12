@@ -98,7 +98,7 @@ export default function Product() {
     <div className="m-5">
         {loading ? (
             <Loader css="h-130" />
-        ) : product?.id ? (
+        ) : product?.productId ? (
             <>
             <ProductDetailCard product={product} />
             <ReviewCard reviews={sampleReviews} />

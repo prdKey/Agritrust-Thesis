@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getOrdersByBuyer, confirmReceipt,
-  cancelOrderByBuyer, openDispute, getOrderById
-} from "../../services/orderService";
-import { useUserContext } from "../../context/UserContext";
+  cancelOrderByBuyer, openDispute
+} from "../../services/orderService.js";
+import { useUserContext } from "../../context/UserContext.jsx";
 import {
   Package, MapPin, CheckCircle, XCircle, AlertTriangle,
   ChevronDown, ChevronUp, Loader2, RefreshCw, Navigation

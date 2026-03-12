@@ -52,6 +52,7 @@ export const getSellerStats = async (req, res) =>{
 
 export const getBalance = async (req, res) => {
   try {
+    
     const walletAddress = req.user.walletAddress;
     const balance = await tokenContract.balanceOf(walletAddress);
     res.json({ balance: Number(formatUnits(balance, 18)) });

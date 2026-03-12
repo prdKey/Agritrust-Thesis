@@ -4,7 +4,6 @@ import {addToCart} from "../../services/cartService.js"
 import Notification from "./Notification.jsx";
 import { useUserContext } from "../../context/UserContext.jsx";
 import { useNavigate } from "react-router-dom";
-import { buyProduct } from "../../services/orderService.js";
 
 export default function ProductDetails({ product }) {
   const {user} = useUserContext();

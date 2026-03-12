@@ -57,7 +57,7 @@ export const verifySignature = async (req, res) =>
       return res.status(401).json({ error: "Signature verification failed" });
     }
 
-    const token = jwt.sign({ walletAddress, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({id: user.id, walletAddress, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
     delete nonces[walletAddress];
 
     res.json({ user: {token: token, ...user.dataValues} });

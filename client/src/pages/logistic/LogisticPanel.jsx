@@ -1,7 +1,7 @@
 import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings } from "lucide-react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../../components/common/Sidebar";
-import UpdateLocation from "./UpdateLocation";
+import Sidebar from "../../components/common/Sidebar.jsx";
+import UpdateLocation from "./UpdateLocation.jsx";
 
 export default function SellerPanel() {
 
