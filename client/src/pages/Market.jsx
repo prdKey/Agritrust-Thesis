@@ -9,7 +9,7 @@ import { SlidersHorizontal, X, Search } from "lucide-react";
 const Marketplace = () => {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get("keyword");
-
+  console.log("")
   const [category, setCategory]       = useState("");
   const [priceRange, setPriceRange]   = useState(["", ""]);
   const [rating, setRating]           = useState(0);
