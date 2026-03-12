@@ -24,7 +24,8 @@ export const getBarangaysByCity = async (cityCode) => {
 
 export const getAddresses = async () => {
   const res = await axios.get(`${API_URL}/addresses`, { headers: authHeader() });
-  return res.data;
+  // Always return an array for safe .filter/.map usage
+  return res.data?.addresses ?? [];
 };
 
 export const getAddressById = async (id) => {
@@ -33,7 +34,6 @@ export const getAddressById = async (id) => {
 };
 
 export const createAddress = async (data) => {
-  console.log("dwadwa")
   const res = await axios.post(`${API_URL}/addresses`, data, { headers: authHeader() });
   return res.data;
 };
