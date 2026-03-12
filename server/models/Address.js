@@ -10,7 +10,7 @@ const Address = sequelize.define("Address", {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: "User", key: "id" },
+    references: { model: "Users", key: "id" },
     onDelete: "CASCADE",
   },
   name: {
