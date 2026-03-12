@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken } from "./tokenService";
+import { getToken } from "./tokenService.js";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const authHeader = () => ({
@@ -7,7 +7,7 @@ const authHeader = () => ({
 });
     
 export const getBalance = async () => {
-    const res = await axios.get(`${API_URL}/user/balance`,
+    const res = await axios.get(`${API_URL}/users/balance`,
         {
             headers: authHeader(),
         }
