@@ -12,6 +12,7 @@ import authRoute from "./routes/Auth.route.js"
 import userRoute from "./routes/User.route.js"
 import orderRoute from "./routes/Order.route.js"
 import cartRoute from "./routes/Cart.route.js"
+import addressRoute from "./routes/Address.route.js"
 
 const app = express();
 const server = http.createServer(app);
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(cors())
 
 
-
+app.use("/api/addresses", addressRoute)
 app.use("/api/products", productRoute)
 app.use("/api/auth", authRoute)
 app.use("/api/users", userRoute)

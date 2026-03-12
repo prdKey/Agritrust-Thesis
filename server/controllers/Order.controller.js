@@ -35,8 +35,9 @@ export const buyProduct = async (req, res) => {
   try {
     const buyerAddress = req.user.walletAddress
     const { productId, quantity} = req.body;
-
+    console.log(req.body);
     const tx = await orderManagerContract.buyProduct(productId, quantity, buyerAddress);
+    
     await tx.wait();
 
     res.json({ message: "Order created successfully", txHash: tx.hash });
