@@ -11,7 +11,7 @@ import Profile from "./pages/user/Profile.jsx";
 import Checkout from "./pages/user/Checkout.jsx";
 import Notifications from "./pages/user/Notifications.jsx";
 import Address from "./pages/user/Address.jsx";
-import AddressForm from "./pages/user/Addressform";
+import AddressForm from "./pages/user/AddressForm";
 import PageNotFound from "./pages/PageNotFound.jsx"
 import Dashboard from "./pages/user/Dashboard.jsx";
 import Settings from "./pages/user/Settings.jsx";
