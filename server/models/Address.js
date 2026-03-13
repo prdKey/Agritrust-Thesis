@@ -10,13 +10,10 @@ const Address = sequelize.define("Address", {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: "Users", key: "id" },
-    onDelete: "CASCADE",
   },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
-    comment: "Recipient name",
   },
   phone: {
     type: DataTypes.STRING,

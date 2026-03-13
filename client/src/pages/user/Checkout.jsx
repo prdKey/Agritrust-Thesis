@@ -3,6 +3,7 @@ import { useUserContext } from "../../context/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { buyProduct } from "../../services/orderService.js";
 import { getAddresses } from "../../services/addressService.js";
+import { removeBulkCartItems } from "../../services/cartService.js";
 import {
   ShoppingBag, MapPin, Wallet, Truck, ChevronRight, ChevronLeft,
   CheckCircle, Loader2, Tag, X, Lock, Zap, Clock,
@@ -58,7 +59,7 @@ export default function CheckoutPage() {
   // ── Load cart items + addresses ───────────────────────────────────────────
   useEffect(() => {
     if (!user) return;
-    
+
     const passedItems = location.state?.items;
     if (!passedItems || passedItems.length === 0) {
       navigate("/cart");
@@ -70,8 +71,7 @@ export default function CheckoutPage() {
         setLoading(true);
         setCartItems(passedItems);
 
-        const data = await getAddresses();
-        const addrs = data.addresses || [];
+        const addrs = await getAddresses(); // already returns [] on failure
         setAddresses(addrs);
         const def = addrs.find(a => a.isDefault);
         if (def) setSelectedAddress(def.id);
@@ -83,6 +83,7 @@ export default function CheckoutPage() {
     };
     load();
   }, [user]);
+
   // ── Cart helpers ──────────────────────────────────────────────────────────
   const updateQty = (productId, delta) =>
     setCartItems(prev =>
@@ -119,6 +120,7 @@ export default function CheckoutPage() {
 
   const selectedAddr  = addresses.find(a => a.id === selectedAddress);
   const deliveryOpt   = DELIVERY_OPTIONS.find(d => d.id === delivery);
+
   // ── Place order — pass deliveryAddress to backend ─────────────────────────
   const placeOrder = async () => {
     if (!selectedAddr) {
@@ -142,6 +144,7 @@ export default function CheckoutPage() {
       city:        selectedAddr.city,
       zipCode:     selectedAddr.zipCode,
     };
+
     const orderIds = [];
     try {
       for (let i = 0; i < cartItems.length; i++) {
@@ -150,6 +153,10 @@ export default function CheckoutPage() {
         orderIds.push(data.order?.id || data.orderId || i + 1);
         setSubmitProgress({ done: i + 1, total: cartItems.length });
       }
+      // Remove purchased items from cart
+      const purchasedProductIds = cartItems.map(i => i.productId);
+      try { await removeBulkCartItems(purchasedProductIds); } catch (_) {}
+
       setOrderSuccess({ orderIds, total });
     } catch (err) {
       console.error(err);

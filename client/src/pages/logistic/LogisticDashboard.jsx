@@ -45,7 +45,7 @@ export default function LogisticsDashboard() {
     try {
       await acceptOrder(orderId);
       await fetchAll();
-      navigate("/logistics/orders");
+      navigate("/logistic/orders");
     } catch (e) { alert(e.response?.data?.error || "Failed to accept order"); }
     finally { setAcceptingId(null); }
   };
@@ -91,7 +91,7 @@ export default function LogisticsDashboard() {
 
       {/* Available jobs banner */}
       {available.length > 0 && (
-        <button onClick={() => navigate("/logistics/orders")}
+        <button onClick={() => navigate("/logistic/orders")}
           className="w-full mb-6 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-4 flex items-center justify-between hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-200 group">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
