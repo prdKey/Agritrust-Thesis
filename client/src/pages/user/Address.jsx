@@ -31,7 +31,7 @@ export default function AddressesPage() {
     try {
       setLoading(true);
       const data = await fetchAddresses();
-      setAddresses(data.addresses || []);
+      setAddresses(data || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };

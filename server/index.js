@@ -16,8 +16,18 @@ import addressRoute from "./routes/Address.route.js"
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(cors(
+  {
+    origin: [
+    "http://localhost:5173",
+    "https://agritrust.shop",
+  ],
+  credentials: true,
+  }
+))
+
 app.use(express.json());
-app.use(cors())
 
 
 app.use("/api/addresses", addressRoute)

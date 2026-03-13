@@ -4,11 +4,10 @@ import { getBalance } from "../../services/userService.js";
 import { ShoppingCart, Search, Bell, BadgeQuestionMark, Wallet, Store, Truck } from "lucide-react";
 import { useState, useEffect } from "react";
 
-
 export default function Header() {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
-  const [search, setSearch]   = useState("");
+  const [search,  setSearch]  = useState("");
   const [balance, setBalance] = useState(null);
   const { user } = useUserContext();
   const navigate = useNavigate();
@@ -40,28 +39,51 @@ export default function Header() {
     return b.toFixed(2);
   };
 
+  // ── Smart navigation for Seller / Logistics buttons ──────────────────────
+  const handleSellerClick = () => {
+    if (!user) return navigate("/login");
+    if (user.role === "SELLER") return navigate("/seller");
+    navigate("/applications"); // not a seller yet → apply
+  };
+
+  const handleLogisticsClick = () => {
+    if (!user) return navigate("/login");
+    if (user.role === "LOGISTICS") return navigate("/logistic");
+    navigate("/applications"); // not logistics yet → apply
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm border-b border-gray-100">
 
-      {/* ── Single green bar ─────────────────────────────────────────── */}
+      {/* ── Green top bar ───────────────────────────────────────────── */}
       <div className="bg-green-600 px-3 py-0 h-9 flex items-center">
         <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
 
-          {/* Left: Seller + Logistic — one line */}
+          {/* Left: Seller + Logistics */}
           <div className="flex items-center divide-x divide-green-500">
             <button
-              onClick={() => navigate("/seller")}
+              onClick={handleSellerClick}
               className="flex items-center gap-1 text-white text-xs hover:text-green-200 transition-colors pr-3"
+              title={user?.role === "SELLER" ? "Go to Seller Centre" : "Apply to become a Seller"}
             >
               <Store size={12} />
               <span>Seller Centre</span>
+              {/* subtle hint if not yet a seller */}
+              {user && user.role !== "SELLER" && user.role !== "ADMIN" && (
+                <span className="ml-1 bg-green-500 text-green-100 text-[10px] px-1 rounded">Apply</span>
+              )}
             </button>
+
             <button
-              onClick={() => navigate("/logistic")}
+              onClick={handleLogisticsClick}
               className="flex items-center gap-1 text-white text-xs hover:text-green-200 transition-colors pl-3"
+              title={user?.role === "LOGISTICS" ? "Go to Logistics Centre" : "Apply to become Logistics"}
             >
               <Truck size={12} />
               <span>Logistic Centre</span>
+              {user && user.role !== "LOGISTICS" && user.role !== "ADMIN" && (
+                <span className="ml-1 bg-green-500 text-green-100 text-[10px] px-1 rounded">Apply</span>
+              )}
             </button>
           </div>
 
@@ -83,7 +105,6 @@ export default function Header() {
               <BadgeQuestionMark size={15} />
             </button>
 
-            {/* AGT Balance */}
             {user && (
               <div className="flex items-center gap-1 bg-green-500 border border-green-400 rounded-full px-2.5 py-0.5">
                 <Wallet size={11} className="text-green-200 flex-shrink-0" />
@@ -93,10 +114,8 @@ export default function Header() {
               </div>
             )}
 
-            {/* Divider */}
             {user && <div className="w-px h-4 bg-green-500" />}
 
-            {/* Profile / Login */}
             {user ? (
               <button
                 onClick={() => navigate("/user")}
@@ -121,10 +140,9 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ── Main row: Logo · Search · Cart ─────────────────────────── */}
+      {/* ── Main row: Logo · Search · Cart ──────────────────────────── */}
       <div className="max-w-7xl mx-auto px-3 py-2.5 flex items-center gap-3">
 
-        {/* Logo */}
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 flex-shrink-0 group"
@@ -139,7 +157,6 @@ export default function Header() {
           </span>
         </button>
 
-        {/* Search — centered, constrained */}
         <div className="flex-1 flex justify-center">
           <div className="flex w-full max-w-md rounded-full overflow-hidden border-2 border-green-600 focus-within:border-green-500 focus-within:shadow-md transition-all">
             <input
@@ -159,14 +176,12 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Cart */}
         <button
           onClick={() => navigate("/cart")}
           className="flex-shrink-0 text-green-600 hover:text-green-500 transition-colors p-1"
         >
           <ShoppingCart size={24} />
         </button>
-
       </div>
     </header>
   );

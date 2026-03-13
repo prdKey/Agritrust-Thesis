@@ -5,7 +5,8 @@ import {
   ShoppingCart, 
   BarChart3, 
   AlertTriangle,
-  Settings
+  Settings,
+  ClipboardList
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/common/Sidebar.jsx";
@@ -15,7 +16,7 @@ export default function AdminPanel() {
   const menu = [
     { name: "Dashboard", icon: LayoutDashboard, path: "dashboard" },
     { name: "User Management", icon: Users, path: "users" },
-    { name: "Applications", icon: Users, path: "applications" }, 
+    { name: "Applications", icon: ClipboardList, path: "applications" }, 
     { name: "Product Management", icon: Package, path: "products" },
     { name: "Orders", icon: ShoppingCart, path: "orders" },
     { name: "Disputes", icon: AlertTriangle, path: "disputes" },

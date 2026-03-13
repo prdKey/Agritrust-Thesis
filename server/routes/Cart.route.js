@@ -1,12 +1,21 @@
-import express from "express"
+import express from "express";
+import {
+  getCart,
+  addToCart,
+  updateCartItem,
+  removeCartItem,
+  clearCart,
+  removeBulkCartItems,
+} from "../controllers/Cart.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import {addToCart, getBuyerCarts, updateCartQuantity, removeFromCart} from "../controllers/Cart.controller.js"
+
 const router = express.Router();
 
-//private routes
-router.get("/", authMiddleware, getBuyerCarts);
-router.post("/", authMiddleware, addToCart);
-router.put("/", authMiddleware, updateCartQuantity);
-router.delete("/:productId", authMiddleware, removeFromCart);
+router.get("/",                authMiddleware, getCart);
+router.post("/",               authMiddleware, addToCart);
+router.put("/:productId",      authMiddleware, updateCartItem);
+router.delete("/bulk",         authMiddleware, removeBulkCartItems);
+router.delete("/clear",        authMiddleware, clearCart);
+router.delete("/:productId",   authMiddleware, removeCartItem);
 
 export default router;
