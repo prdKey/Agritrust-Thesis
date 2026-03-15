@@ -60,9 +60,9 @@ function App() {
           <Route path="users" element={<UserManagement/>}/>
           <Route path="applications" element={<AdminApplications/>}/>
           <Route path="products" element={<AdminProducts />}/>
+          <Route path="token-management" element={<TokenManagement/>}/>
           <Route path="disputes" element={<AdminDisputes />}/>
           <Route path="reports" element={<AdminReports />}/>
-          <Route path="token-management" element={<TokenManagement/>}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
 
