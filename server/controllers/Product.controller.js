@@ -39,6 +39,7 @@ export const getAllProducts = async (req, res) => {
 
 export const getProductsBySeller = async (req, res) => {
   try {
+    
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     
@@ -86,9 +87,10 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
+    
     const walletAddress = req.user.walletAddress;
     const { name, stock, category ,pricePerUnit, imageCID } = req.body;
-
+    
     const tx = await productManagerContract.listProduct(
       name,
       imageCID,
@@ -98,9 +100,8 @@ export const createProduct = async (req, res) => {
       walletAddress
     )
     await tx.wait();
-    
     const productsRaw = await productManagerContract.getProductsBySeller(walletAddress)
-
+    console.log("---------------------------------")
     const products = productsRaw.map((p) => ({
         id: Number(p.id),      // BigInt -> string
         sellerAddress: p.sellerAddress,

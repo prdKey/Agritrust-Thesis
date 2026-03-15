@@ -367,7 +367,7 @@ export default function SellerDashboard() {
         </button>
 
         <button
-          onClick={() => navigate('/marketplace')}
+          onClick={() => navigate('/')}
           className="bg-white border-2 border-gray-200 hover:border-purple-500 rounded-lg p-6 transition-all duration-200 group"
         >
           <div className="flex items-center gap-4">

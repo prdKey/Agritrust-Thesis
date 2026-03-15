@@ -17,7 +17,7 @@ import {
     cancelOrderByBuyer,
     openDispute,
     resolveDispute,
-    getDisputedOrders
+    getDisputedOrders,
 } from "../controllers/Order.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 const router = express.Router();

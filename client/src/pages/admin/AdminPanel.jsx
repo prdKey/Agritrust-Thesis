@@ -6,7 +6,8 @@ import {
   BarChart3, 
   AlertTriangle,
   Settings,
-  ClipboardList
+  ClipboardList,
+  Coins
 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/common/Sidebar.jsx";
@@ -20,6 +21,7 @@ export default function AdminPanel() {
     { name: "Product Management", icon: Package, path: "products" },
     { name: "Orders", icon: ShoppingCart, path: "orders" },
     { name: "Disputes", icon: AlertTriangle, path: "disputes" },
+    { name: "Token Management", icon: Coins, path: "token-management" },
     { name: "Reports & Analytics", icon: BarChart3, path: "reports" },
     { name: "Settings", icon: Settings, path: "settings" },
   ];

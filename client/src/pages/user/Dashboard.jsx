@@ -363,7 +363,7 @@ export default function BuyerDashboard() {
       {/* Quick Actions */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          onClick={() => navigate('/marketplace')}
+          onClick={() => navigate('/')}
           className="bg-white border-2 border-gray-200 hover:border-green-500 rounded-lg p-6 transition-all duration-200 group"
         >
           <div className="flex items-center gap-4">
@@ -378,7 +378,7 @@ export default function BuyerDashboard() {
         </button>
 
         <button
-          onClick={() => navigate('/orders')}
+          onClick={() => navigate('/user/purchase')}
           className="bg-white border-2 border-gray-200 hover:border-blue-500 rounded-lg p-6 transition-all duration-200 group"
         >
           <div className="flex items-center gap-4">
@@ -393,7 +393,7 @@ export default function BuyerDashboard() {
         </button>
 
         <button
-          onClick={() => navigate('/orders')}
+          onClick={() => navigate('/user/purchase')}
           className="bg-white border-2 border-gray-200 hover:border-purple-500 rounded-lg p-6 transition-all duration-200 group"
         >
           <div className="flex items-center gap-4">

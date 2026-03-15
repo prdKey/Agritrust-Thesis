@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getOrdersByBuyer, confirmReceipt,
-  cancelOrderByBuyer, openDispute, getOrderById
+  cancelOrderByBuyer, openDispute
 } from "../../services/orderService";
+import { checkOrderRating } from "../../services/ratingService.js";
 import { useUserContext } from "../../context/UserContext";
+import RatingModal from "../../components/common/RatingModal.jsx";
 import {
   Package, MapPin, CheckCircle, XCircle, AlertTriangle,
-  ChevronDown, ChevronUp, Loader2, RefreshCw, Navigation
+  ChevronDown, ChevronUp, Loader2, RefreshCw, Navigation, Star
 } from "lucide-react";
 
 const STATUS_TABS = [
@@ -42,7 +44,6 @@ const fmtAddr = (loc) => {
   return `#${loc.houseNumber}, ${loc.street}, ${loc.barangay}, ${loc.city}`;
 };
 
-// Cancellation fee = 1% of totalPrice (matches contract cancellationFeeRate = 100 bps)
 const calcCancellationFee = (totalPrice) => (parseFloat(totalPrice) * 0.01).toFixed(4);
 
 export default function BuyerOrders() {
@@ -50,16 +51,28 @@ export default function BuyerOrders() {
   const navigate   = useNavigate();
   const [orders, setOrders]               = useState([]);
   const [loading, setLoading]             = useState(true);
-  const [actionLoading, setActionLoading] = useState(null); // orderId being acted on
+  const [actionLoading, setActionLoading] = useState(null);
   const [expandedId, setExpandedId]       = useState(null);
   const [activeTab, setActiveTab]         = useState("all");
-  const [modal, setModal]                 = useState(null); // { type, order }
+  const [modal, setModal]                 = useState(null);
+
+  // ── Rating state ──────────────────────────────────────────────────────────
+  const [ratingOrder, setRatingOrder]   = useState(null); // order to rate
+  const [ratedOrders, setRatedOrders]   = useState({}); // { orderId: true/false }
 
   const fetchOrders = async () => {
     if (!user) return;
     try {
       const data = await getOrdersByBuyer();
-      setOrders(data.orders || []);
+      const orders = data.orders || [];
+      setOrders(orders);
+
+      // Check which completed orders are already rated
+      const completed = orders.filter(o => o.status === 6);
+      const ratingChecks = await Promise.all(
+        completed.map(o => checkOrderRating(o.id).then(r => [o.id, r.rated]))
+      );
+      setRatedOrders(Object.fromEntries(ratingChecks));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -94,14 +107,14 @@ export default function BuyerOrders() {
     finally { setActionLoading(null); }
   };
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const getStatusBadge = (status) => {
     const cfg = STATUS_CONFIG[status] || { label: "UNKNOWN", color: "bg-gray-100 text-gray-800 border-gray-200" };
     return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>{cfg.label}</span>;
   };
 
-  const filteredOrders = (activeTab === "all" ? orders : orders.filter(o => o.status === activeTab))
-    .slice().sort((a, b) => b.id - a.id);
+  const filteredOrders = (activeTab === "all" ? orders : orders.filter(o =>
+    activeTab === "cancelled" ? (o.status === 9 || o.status === 10) : o.status === activeTab
+  )).slice().sort((a, b) => b.id - a.id);
 
   // ── Confirm Modal ──────────────────────────────────────────────────────────
   const ConfirmModal = ({ modal, onClose }) => {
@@ -159,6 +172,18 @@ export default function BuyerOrders() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <ConfirmModal modal={modal} onClose={() => setModal(null)} />
 
+      {/* Rating Modal */}
+      {ratingOrder && (
+        <RatingModal
+          order={ratingOrder}
+          onClose={() => setRatingOrder(null)}
+          onSuccess={() => {
+            setRatingOrder(null);
+            fetchOrders(); // refresh to update rated status
+          }}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Purchases</h1>
@@ -183,17 +208,19 @@ export default function BuyerOrders() {
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-1">No orders found</h3>
-          <p className="text-gray-500 text-sm">{activeTab === "all" ? "You haven't made any purchases yet" : `No orders with this status`}</p>
+          <p className="text-gray-500 text-sm">{activeTab === "all" ? "You haven't made any purchases yet" : "No orders with this status"}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {filteredOrders.map(order => {
-            const isExpanded   = expandedId === order.id;
-            const isActing     = actionLoading === order.id;
-            const canCancel    = order.status === 1;
-            const canConfirm   = order.status === 5;
-            const canDispute   = [2, 3, 4, 5].includes(order.status);
-            const canTrack     = [2, 3, 4, 5].includes(order.status);
+            const isExpanded = expandedId === order.id;
+            const isActing   = actionLoading === order.id;
+            const canCancel  = order.status === 1;
+            const canConfirm = order.status === 5;
+            const canDispute = [2, 3, 4, 5].includes(order.status);
+            const canTrack   = [2, 3, 4, 5].includes(order.status);
+            const isCompleted = order.status === 6;
+            const alreadyRated = ratedOrders[order.id];
 
             return (
               <div key={order.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 overflow-hidden">
@@ -229,7 +256,6 @@ export default function BuyerOrders() {
                           <p className="text-sm font-semibold text-gray-900">{order.sellerName || "Unknown"}</p>
                           <p className="text-xs text-gray-500 mt-0.5">{fmtAddr(order.sellerLocation)}</p>
                         </div>
-                        {order.sellerMobile && <a href={`tel:${order.sellerMobile}`} className="text-xs text-blue-600 hover:text-blue-800 font-medium flex-shrink-0 ml-3">📞 {order.sellerMobile}</a>}
                       </div>
                     </div>
 
@@ -237,9 +263,8 @@ export default function BuyerOrders() {
                     {order.logisticsName && (
                       <div>
                         <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Logistics Provider</p>
-                        <div className="bg-blue-50 rounded-xl p-3 border border-blue-200 flex items-center justify-between">
+                        <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
                           <p className="text-sm font-semibold text-gray-900">{order.logisticsName}</p>
-                          {order.logisticsMobile && <a href={`tel:${order.logisticsMobile}`} className="text-xs text-blue-600 hover:text-blue-800 font-medium flex-shrink-0 ml-3">📞 {order.logisticsMobile}</a>}
                         </div>
                       </div>
                     )}
@@ -271,6 +296,22 @@ export default function BuyerOrders() {
                         </button>
                       )}
 
+                      {/* ── Rate button — completed orders only ── */}
+                      {isCompleted && (
+                        alreadyRated ? (
+                          <span className="flex items-center gap-1.5 px-4 py-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-xl text-sm font-medium">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Rated
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setRatingOrder(order)}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-colors"
+                          >
+                            <Star className="w-3.5 h-3.5" /> Rate Product
+                          </button>
+                        )
+                      )}
+
                       {/* Status messages */}
                       {order.status === 1  && <span className="text-sm text-yellow-600 font-medium self-center">⏳ Awaiting shipment</span>}
                       {order.status === 2  && <span className="text-sm text-blue-600 font-medium self-center">📦 Waiting for logistics pickup</span>}
@@ -289,7 +330,6 @@ export default function BuyerOrders() {
                     {/* Expanded details */}
                     {isExpanded && (
                       <div className="border-t border-gray-200 pt-4 grid md:grid-cols-3 gap-4">
-                        {/* Price breakdown */}
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                           <h4 className="font-semibold text-gray-900 text-sm mb-3">Price Breakdown</h4>
                           <div className="space-y-2 text-xs">
@@ -301,18 +341,17 @@ export default function BuyerOrders() {
                           </div>
                         </div>
 
-                        {/* Timeline */}
                         <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                           <h4 className="font-semibold text-gray-900 text-sm mb-3">Timeline</h4>
                           <div className="space-y-1.5 text-xs">
                             {[
-                              ["Created", order.createdAt],
-                              ["Shipped", order.confirmAt],
-                              ["Picked Up", order.pickedUpAt],
+                              ["Created",          order.createdAt],
+                              ["Shipped",          order.confirmAt],
+                              ["Picked Up",        order.pickedUpAt],
                               ["Out for Delivery", order.outForDeliveryAt],
-                              ["Delivered", order.deliveredAt],
-                              ["Completed", order.completedAt],
-                              ["Cancelled", order.cancelledAt],
+                              ["Delivered",        order.deliveredAt],
+                              ["Completed",        order.completedAt],
+                              ["Cancelled",        order.cancelledAt],
                             ].filter(([, ts]) => ts && ts > 0).map(([label, ts]) => (
                               <div key={label} className="flex justify-between gap-2">
                                 <span className="text-gray-500 flex-shrink-0">{label}:</span>
@@ -322,12 +361,18 @@ export default function BuyerOrders() {
                           </div>
                         </div>
 
-                        {/* Location / misc */}
                         <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
                           <h4 className="font-semibold text-gray-900 text-sm mb-3">Details</h4>
                           <div className="text-xs space-y-2">
                             <div className="flex justify-between"><span className="text-gray-500">Product ID</span><span className="font-medium">#{order.productId}</span></div>
                             <div className="flex justify-between"><span className="text-gray-500">Order ID</span><span className="font-medium">#{order.id}</span></div>
+                            {order.deliveryAddress && (
+                              <div className="pt-2 border-t">
+                                <p className="text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Delivery Address</p>
+                                <p className="font-medium break-words">{order.deliveryAddress.fullAddress}</p>
+                                <p className="text-gray-400 mt-0.5">{order.deliveryAddress.phone}</p>
+                              </div>
+                            )}
                             {order.location && (
                               <div className="pt-2 border-t">
                                 <p className="text-gray-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Last Location</p>

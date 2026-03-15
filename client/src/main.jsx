@@ -5,13 +5,12 @@ import App from './App.jsx'
 import { UserProvider } from './context/UserContext.jsx'
 import { BrowserRouter as Router } from "react-router-dom";
 
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Router>
-      <UserProvider>
-        <App />
-      </UserProvider>
+        <UserProvider>
+          <App />
+        </UserProvider>
     </Router>
   </StrictMode>,
 )

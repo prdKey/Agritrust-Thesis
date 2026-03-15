@@ -42,18 +42,6 @@ export const getSellerStats = async (req, res) =>{
   }
 }
 
-export const getBalance = async (req, res) => {
-  try {
-    
-    const walletAddress = req.user.walletAddress;
-    const balance = await tokenContract.balanceOf(walletAddress);
-    res.json({ balance: Number(formatUnits(balance, 18)) });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
-  }
-};
-
 /* ── USER MANAGEMENT ────────────────────────────────────────────────────────── */
 
 export const getAllUsers = async (req, res) => {

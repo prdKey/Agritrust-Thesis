@@ -12,9 +12,9 @@ const ICON_MAP = {
   INFO:     { icon: Info,        color: "text-gray-600",   bg: "bg-gray-100"   },
 };
 
-const FILTERS = ["ALL","UNREAD","READ","ORDER","DELIVERY","SUCCESS","ALERT","INFO"];
+const FILTERS = ["ALL","UNREAD","READ","ORDER","SUCCESS","ALERT","INFO"];
 
-export default function BuyerNotifications() {
+export default function SellerNotifications() {
   const { user }   = useUserContext();
   const navigate   = useNavigate();
   const [notifications, setNotifications] = useState([]);
@@ -88,7 +88,7 @@ export default function BuyerNotifications() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Seller Notifications</h1>
             <p className="text-gray-600 mt-1">
               {unreadCount > 0
                 ? <span className="font-semibold text-green-600">{unreadCount} unread</span>
@@ -140,7 +140,7 @@ export default function BuyerNotifications() {
               const Icon     = iconData.icon;
               return (
                 <div key={n.id} className={`bg-white rounded-lg shadow-sm border overflow-hidden transition-all ${
-                  !n.read ? "border-l-4 bg-green-600 border-opacity-60" : "border-gray-200 hover:shadow-md"
+                  !n.read ? "border-l-4 bg-blue-500 border-opacity-60" : "border-gray-200 hover:shadow-md"
                 }`}>
                   <div className="p-4 flex items-start gap-4">
                     <div className={`flex-shrink-0 ${iconData.bg} p-3 rounded-lg`}>
@@ -150,14 +150,14 @@ export default function BuyerNotifications() {
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className={`font-semibold text-sm ${!n.read ? "text-gray-900" : "text-gray-700"}`}>
                           {n.title}
-                          {!n.read && <span className="ml-2 inline-block w-2 h-2 bg-green-600 rounded-full" />}
+                          {!n.read && <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full" />}
                         </h3>
                         <span className="text-xs text-gray-400 whitespace-nowrap">{formatTimestamp(n.createdAt)}</span>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">{n.message}</p>
                       <div className="flex items-center gap-3 flex-wrap">
                         {n.orderId && (
-                          <button onClick={() => navigate("/user/purchase")}
+                          <button onClick={() => navigate("/seller/orders")}
                             className="text-xs text-green-600 hover:text-green-700 font-medium">
                             View Order #{n.orderId}
                           </button>

@@ -19,13 +19,14 @@ import SellerPanel from "./pages/seller/SellerPanel.jsx";
 import SellerDashboard from "./pages/seller/SellerDashboard.jsx"
 import SellerProducts from "./pages/seller/SellerProduct.jsx";
 import SellerOrders from "./pages/seller/SellerOrders.jsx"
+import SellerNotifications from "./pages/seller/SellerNotifications";
 import Product from "./pages/user/Product.jsx";
 import Cart from "./pages/user/Cart.jsx";
 import Orders from "./pages/user/Orders.jsx"
 import LogisticPanel from "./pages/logistic/LogisticPanel.jsx"
 import LogisticDashboard from "./pages/logistic/LogisticDashboard.jsx";
-import LogisticAvailableOrders from "./pages/logistic/LogisticAvailableOrder.jsx";
 import LogisticOrders from "./pages/logistic/LogisticOrder.jsx";
+import LogisticsNotifications from "./pages/logistic/LogisticNotifications";
 import TrackOrder from "./pages/TrackOrder";
 import AdminPanel from "./pages/admin/AdminPanel.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
@@ -34,6 +35,9 @@ import AdminApplications from "./pages/admin/AdminApplications";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminDisputes from "./pages/admin/AdminDisputes";
+import TokenManagement from "./pages/admin/TokenManagement";
+
+import Wallet from "./pages/Wallet.jsx";
 
 import Application from "./pages/Application.jsx"
 
@@ -45,6 +49,7 @@ function App() {
           <Route index element={<SellerDashboard/>}/>
           <Route path="dashboard" element={<SellerDashboard/>}/>
           <Route path="products" element={<SellerProducts />}/>
+          <Route path="notifications" element={<SellerNotifications/>}/>
           <Route path="orders" element={<SellerOrders />}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
@@ -57,6 +62,7 @@ function App() {
           <Route path="products" element={<AdminProducts />}/>
           <Route path="disputes" element={<AdminDisputes />}/>
           <Route path="reports" element={<AdminReports />}/>
+          <Route path="token-management" element={<TokenManagement/>}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
 
@@ -65,7 +71,7 @@ function App() {
         <Route path="/logistic" element={<ProtectedRoute roles={["LOGISTICS"]} ><LogisticPanel/></ProtectedRoute>}>
           <Route index element={<LogisticDashboard/>}/>
           <Route path="dashboard" element={<LogisticDashboard/>}/>
-          <Route path="available-orders" element={<LogisticAvailableOrders />}/>
+          <Route path="notifications" element={<LogisticsNotifications/>}/>
           <Route path="orders" element={<LogisticOrders/>}/>
           <Route path="*" element={<div>Page Not Found</div>}/>
         </Route>
@@ -99,6 +105,7 @@ function App() {
         </Route>
         <Route path="/cart" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Cart/></ProtectedRoute>}/>
         <Route path="/checkout" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Checkout/></ProtectedRoute>}/>
+        <Route path="/wallet" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Wallet/></ProtectedRoute>}/>
         <Route path="/*" element={<PageNotFound/>} />
       </Route>
     </Routes>

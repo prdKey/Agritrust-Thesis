@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings, Bell} from "lucide-react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/common/Sidebar.jsx";
 import UpdateLocation from "./UpdateLocation.jsx";
@@ -7,8 +7,8 @@ export default function SellerPanel() {
 
   const menu = [
     { name: "Dashboard", icon: LayoutDashboard, path:"dashboard"},
-    { name: "Available Orders", icon: Package, path:"available-orders" },
     { name: "Orders To Deliver", icon: ShoppingCart, path:"orders" },
+    { name: "Notifications", icon:  Bell, path: "notifications"},
     { name: "Analytics", icon: BarChart3, path:"analytics" },
     { name: "Settings", icon: Settings, path:"settings" },
   ];

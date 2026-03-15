@@ -13,6 +13,10 @@ import userRoute from "./routes/User.route.js"
 import orderRoute from "./routes/Order.route.js"
 import cartRoute from "./routes/Cart.route.js"
 import addressRoute from "./routes/Address.route.js"
+import tokenRoute from "./routes/Token.route.js";
+import sfuelRoute from "./routes/SFuel.route.js";
+import ratingRoute from "./routes/Rating.route.js"
+import notificationRoute from "./routes/Notification.route.js"
 
 const app = express();
 const server = http.createServer(app);
@@ -29,8 +33,11 @@ app.use(cors(
 
 app.use(express.json());
 
-
+app.use("/api/ratings", ratingRoute)
+app.use("/api/notifications", notificationRoute)
 app.use("/api/addresses", addressRoute)
+app.use("/api/sfuel", sfuelRoute);
+app.use("/api/tokens", tokenRoute);
 app.use("/api/products", productRoute)
 app.use("/api/auth", authRoute)
 app.use("/api/users", userRoute)

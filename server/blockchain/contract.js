@@ -12,11 +12,12 @@ const ABI = []
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY, provider);
+console.log("Admin wallet:", wallet);
 
 export const contract = new ethers.Contract(
   process.env.CONTRACT_ADDRESS,
   ABI,
-  wallet
+  wallet 
 );
 
 export const productManagerContract = new ethers.Contract(

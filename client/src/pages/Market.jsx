@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import FilterCard from "../components/common/FilterCard.jsx";
 import ProductCard from "../components/common/ProductCard.jsx";
 import { getAllProducts } from "../services/productService.js";
+import { getProductRatings } from "../services/ratingService.js";
 import Loader from "../components/common/Loader.jsx";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, X, Search, Leaf } from "lucide-react";
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
 const toArray = (data) =>
   Array.isArray(data) ? data : (data?.products ?? []);
 
@@ -20,30 +20,40 @@ const applyFilters = (list, { keyword, category, priceRange, inStockOnly }) =>
     return true;
   });
 
-// ─── component ────────────────────────────────────────────────────────────────
 const Marketplace = () => {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") ?? "";
 
-  // filter state
   const [category,    setCategory]    = useState("");
   const [priceRange,  setPriceRange]  = useState(["", ""]);
   const [rating,      setRating]      = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  // data state
   const [allProducts, setAllProducts] = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [showFilter,  setShowFilter]  = useState(false);
 
-  // fetch once on mount — keyword filtering handled client-side
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         setLoading(true);
-        const data = await getAllProducts();
-        if (!cancelled) setAllProducts(toArray(data));
+        const data     = await getAllProducts();
+        const products = toArray(data);
+
+        // Attach ratings to all products in one batch
+        const productIds = products.map(p => p.id);
+        const ratingsData = await Promise.all(
+          productIds.map(id => getProductRatings(id).catch(() => ({ averageRating: 0, totalRatings: 0 })))
+        );
+
+        const withRatings = products.map((p, i) => ({
+          ...p,
+          averageRating: ratingsData[i]?.averageRating ?? 0,
+          totalRatings:  ratingsData[i]?.totalRatings  ?? 0,
+        }));
+
+        if (!cancelled) setAllProducts(withRatings);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         if (!cancelled) setAllProducts([]);
@@ -53,9 +63,8 @@ const Marketplace = () => {
     };
     load();
     return () => { cancelled = true; };
-  }, []); // ← fetch only once; keyword is a client filter
+  }, []);
 
-  // derived — runs on every render, no extra state needed
   const filtered = applyFilters(allProducts, { keyword, category, priceRange, inStockOnly });
 
   const activeFilterCount = [
@@ -72,12 +81,10 @@ const Marketplace = () => {
     inStockOnly, setInStockOnly,
   };
 
-  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
       <Outlet />
 
-      {/* ── Page header ───────────────────────────────────────────────────── */}
       <div className="px-4 pt-6 pb-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div>
@@ -95,11 +102,8 @@ const Marketplace = () => {
             </p>
           </div>
 
-          {/* Mobile filter trigger */}
-          <button
-            onClick={() => setShowFilter(true)}
-            className="md:hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold shadow-sm"
-          >
+          <button onClick={() => setShowFilter(true)}
+            className="md:hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold shadow-sm">
             <SlidersHorizontal size={15} />
             Filters
             {activeFilterCount > 0 && (
@@ -111,45 +115,33 @@ const Marketplace = () => {
         </div>
       </div>
 
-      {/* ── Mobile filter drawer ───────────────────────────────────────────── */}
+      {/* Mobile filter drawer */}
       {showFilter && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowFilter(false)}
-          />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFilter(false)} />
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold text-gray-900">Filters</h2>
-              <button
-                onClick={() => setShowFilter(false)}
-                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={() => setShowFilter(false)} className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                 <X size={18} className="text-gray-600" />
               </button>
             </div>
             <FilterCard {...filterProps} />
-            <button
-              onClick={() => setShowFilter(false)}
-              className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm hover:bg-green-700 transition-colors"
-            >
+            <button onClick={() => setShowFilter(false)}
+              className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-xl text-sm hover:bg-green-700 transition-colors">
               Show {filtered.length} Products
             </button>
           </div>
         </div>
       )}
 
-      {/* ── Main layout ───────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 py-5 flex gap-6">
-
-        {/* Desktop sidebar */}
         <aside className="hidden md:block w-56 flex-shrink-0">
           <div className="sticky top-[133px]">
             <FilterCard {...filterProps} />
           </div>
         </aside>
 
-        {/* Product grid */}
         <main className="flex-1 min-w-0">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-3 text-gray-400">

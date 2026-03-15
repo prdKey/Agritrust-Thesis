@@ -180,7 +180,7 @@ export default function LogisticsDashboard() {
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-500" /> Active Jobs
             </h2>
-            <button onClick={() => navigate("/logistics/orders")}
+            <button onClick={() => navigate("/logistic/orders")}
               className="text-xs text-green-600 font-semibold hover:text-green-700 flex items-center gap-1">
               View All <ArrowRight className="w-3 h-3" />
             </button>
@@ -190,7 +190,7 @@ export default function LogisticsDashboard() {
               <div className="p-10 text-center">
                 <Truck className="w-12 h-12 mx-auto text-gray-200 mb-3" />
                 <p className="text-gray-500 text-sm font-medium">No active jobs</p>
-                <button onClick={() => navigate("/logistics/orders")}
+                <button onClick={() => navigate("/logistic/orders")}
                   className="mt-3 text-xs text-green-600 font-semibold hover:text-green-700">Browse available jobs →</button>
               </div>
             ) : activeJobs.slice(0, 5).map(order => {
@@ -239,7 +239,7 @@ export default function LogisticsDashboard() {
                   <span className="px-2 py-0.5 bg-green-600 text-white text-xs font-bold rounded-full">{available.length}</span>
                 )}
               </h2>
-              <button onClick={() => navigate("/logistics/orders")}
+              <button onClick={() => navigate("/logistic/orders")}
                 className="text-xs text-green-600 font-semibold hover:text-green-700 flex items-center gap-1">
                 Browse All <ArrowRight className="w-3 h-3" />
               </button>
@@ -280,7 +280,7 @@ export default function LogisticsDashboard() {
               ))}
               {available.length > 3 && (
                 <div className="px-6 py-3 text-center">
-                  <button onClick={() => navigate("/logistics/orders")}
+                  <button onClick={() => navigate("/logistic/orders")}
                     className="text-xs text-green-600 font-semibold hover:text-green-700">
                     +{available.length - 3} more jobs available →
                   </button>
@@ -314,7 +314,7 @@ export default function LogisticsDashboard() {
 
           {/* Quick links */}
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => navigate("/logistics/orders")}
+            <button onClick={() => navigate("/logistic/orders")}
               className="bg-white border-2 border-gray-200 hover:border-green-500 rounded-2xl p-4 transition-all group text-left">
               <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-600 transition-colors">
                 <Truck className="w-4 h-4 text-green-600 group-hover:text-white" />
@@ -322,7 +322,7 @@ export default function LogisticsDashboard() {
               <p className="text-sm font-bold text-gray-900">My Deliveries</p>
               <p className="text-xs text-gray-400 mt-0.5">{totalDeliveries} orders</p>
             </button>
-            <button onClick={() => navigate("/logistics/orders")}
+            <button onClick={() => navigate("/logistic/orders")}
               className="bg-white border-2 border-gray-200 hover:border-amber-500 rounded-2xl p-4 transition-all group text-left">
               <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-amber-500 transition-colors">
                 <Star className="w-4 h-4 text-amber-600 group-hover:text-white" />
