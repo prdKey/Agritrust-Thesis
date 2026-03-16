@@ -13,7 +13,6 @@ export const getTotalSupply = async () => {
 /* Get AGT balance of any address */
 export const getBalance = async (address) => {
   const res = await axios.get(`${API}/tokens/balance/${address}`, { headers: authHeader() });
-  console.log(res.data.balance)
   return res.data.balance;
 };
 
