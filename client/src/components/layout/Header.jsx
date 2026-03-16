@@ -147,7 +147,7 @@ export default function Header() {
             </button>
 
             {user && (
-              <div className="flex items-center gap-1 bg-green-500 border border-green-400 rounded-full px-2.5 py-0.5">
+              <div onClick={() => navigate("/wallet")} className="flex items-center gap-1 bg-green-500 border border-green-400 rounded-full px-2.5 py-0.5">
                 <Wallet size={11} className="text-green-200 flex-shrink-0" />
                 <span className="text-xs font-bold text-white whitespace-nowrap">
                   {fmtBalance(balance)} AGT

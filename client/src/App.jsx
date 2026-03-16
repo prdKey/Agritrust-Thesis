@@ -35,9 +35,10 @@ import AdminApplications from "./pages/admin/AdminApplications";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminDisputes from "./pages/admin/AdminDisputes";
+import AdminWallet from "./pages/admin/AdminWallet.jsx";
 import TokenManagement from "./pages/admin/TokenManagement";
 
-//import Wallet from "./pages/Wallet.jsx";
+import Wallet from "./pages/Wallet.jsx";
 
 import Application from "./pages/Application.jsx"
 
@@ -60,6 +61,7 @@ function App() {
           <Route path="users" element={<UserManagement/>}/>
           <Route path="applications" element={<AdminApplications/>}/>
           <Route path="products" element={<AdminProducts />}/>
+          <Route path="wallet" element={<AdminWallet />} />
           <Route path="token-management" element={<TokenManagement/>}/>
           <Route path="disputes" element={<AdminDisputes />}/>
           <Route path="reports" element={<AdminReports />}/>
@@ -105,7 +107,7 @@ function App() {
         </Route>
         <Route path="/cart" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Cart/></ProtectedRoute>}/>
         <Route path="/checkout" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Checkout/></ProtectedRoute>}/>
-        <Route path="/wallet" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><></></ProtectedRoute>}/>
+        <Route path="/wallet" element={<ProtectedRoute roles={["USER", "SELLER", "LOGISTICS", "ADMIN"]}><Wallet/></ProtectedRoute>}/>
         <Route path="/*" element={<PageNotFound/>} />
       </Route>
     </Routes>

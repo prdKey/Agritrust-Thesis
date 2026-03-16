@@ -17,6 +17,7 @@ import tokenRoute from "./routes/Token.route.js";
 import sfuelRoute from "./routes/SFuel.route.js";
 import ratingRoute from "./routes/Rating.route.js"
 import notificationRoute from "./routes/Notification.route.js"
+import walletRoute from "./routes/Wallet.route.js"
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +35,7 @@ app.use(cors(
 app.use(express.json());
 
 app.use("/api/ratings", ratingRoute)
+app.use("/api/wallet", walletRoute)
 app.use("/api/notifications", notificationRoute)
 app.use("/api/addresses", addressRoute)
 app.use("/api/sfuel", sfuelRoute);

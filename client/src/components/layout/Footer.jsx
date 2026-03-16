@@ -31,10 +31,10 @@ export default function Footer() {
           <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Quick Links</h4>
           <div className="flex flex-col gap-2">
             {[
-              { label: "Marketplace",      path: "/marketplace" },
+              { label: "Marketplace",      path: "/" },
               { label: "Seller Centre",    path: "/seller" },
               { label: "Logistic Centre",  path: "/logistic" },
-              { label: "My Orders",        path: "/user/orders" },
+              { label: "My Orders",        path: "/user/purchase" },
               { label: "Cart",             path: "/cart" },
             ].map(({ label, path }) => (
               <button
